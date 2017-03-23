@@ -8,6 +8,7 @@ import peckb1.examples.model.variables.Red;
 import peckb1.examples.model.variables.Wembley;
 import peckb1.processor.AutoJackson;
 import peckb1.processor.AutoJacksonTypeClass;
+import peckb1.processor.Named;
 
 import java.util.Optional;
 
@@ -20,7 +21,7 @@ public interface RecursiveVariable {
 
     String getName();
 
-    Optional<RecursiveVariable> getChild();
+    @Named("roommate") Optional<RecursiveVariable> getChild();
 
     enum RecursiveVariableType {
         GOBO(Gobo.class),

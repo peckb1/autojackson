@@ -12,10 +12,35 @@
     "type": "WEMBLEY",
     "value": 87,
     "name": "ourName",
-    "fires" : 9001
+    "fires": 9001
   },
-  "c_list" : [],
-  "e_list" : [],
-  "v_array" : [],
-  "p_array" : []
+  "c_list": [
+    {
+      "value": 41,
+      "name": "entry_01"
+    },
+    {
+      "value": 14,
+      "name": "entry_02"
+    }
+  ],
+  "e_list": [
+    "KERMIT",
+    "FOZZIE"
+  ],
+  "v_array": [
+    {
+      "type": "RED",
+      "value": 7,
+      "name": "red",
+      "dives": 50
+    },
+    {
+      "type": "GOBO",
+      "value": 17,
+      "name": "gobo",
+      "postcards": 50
+    }
+  ],
+  "p_array": ["abc", "def"]
 }

@@ -15,7 +15,7 @@ public interface TopLevel {
     @Named("mp01") String getMandatoryPrimitive01();
     @Named("mp02") long getMandatoryPrimitive02();
     @Named("op01") Optional<Integer> getOptionalPrimitive01();
-    @Named("op03") Optional<Boolean> getOptionalPrimitive02();
+    @Named("op02") Optional<Boolean> getOptionalPrimitive02();
 
     // ----------- enumerations -----------
     @Named("fe") FirstEnum getFirstEnum();

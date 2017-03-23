@@ -1,0 +1,13 @@
+### Intellij ###
+*.iml
+.idea/
+*.ipr
+*.iws
+
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### Maven ###
+target/

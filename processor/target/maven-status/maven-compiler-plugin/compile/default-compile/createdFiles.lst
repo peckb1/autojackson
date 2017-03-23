@@ -1,9 +1,0 @@
-peckb1/processor/Named.class
-peckb1/processor/AutoJackson.class
-peckb1/processor/AutoJacksonProcessor$Variable.class
-peckb1/processor/AutoJackson$Type.class
-peckb1/processor/AutoJacksonTypeClass.class
-peckb1/processor/NoTypeEnum.class
-META-INF/services/javax.annotation.processing.Processor
-peckb1/processor/AutoJacksonProcessor.class
-peckb1/processor/AutoJacksonProcessor$1.class

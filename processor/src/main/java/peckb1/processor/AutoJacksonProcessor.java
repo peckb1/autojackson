@@ -305,10 +305,14 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
             String staticName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, variableName);
 
-            AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
-                    .addMember("value", "$L", staticName)
-                    // TODO .addMember("required", "true")
-                    .build();
+            AnnotationSpec.Builder jacksonAnnotationBuilder = AnnotationSpec.builder(JsonProperty.class)
+                    .addMember("value", "$L", staticName);
+
+            if (memberVariable.isRequired()) {
+                jacksonAnnotationBuilder.addMember("required", "true");
+            }
+
+            AnnotationSpec jacksonAnnotation = jacksonAnnotationBuilder.build();
 
             ParameterSpec parameter = ParameterSpec.builder(typeName, variableName)
                     .addAnnotation(jacksonAnnotation)
@@ -340,10 +344,17 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
         String staticName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, memberVariableName);
 
-        AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
-                .addMember("value", "$L", staticName)
-                // TODO .addMember("required", "true")
-                .build();
+        AnnotationSpec.Builder jacksonAnnotationBuilder = AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$L", staticName);
+
+        TypeMirror optional = this.elementUtils.getTypeElement(Optional.class.getCanonicalName()).asType();
+        TypeMirror erasure = this.typeUtils.erasure(method.getReturnType());
+        boolean optionalItem = this.typeUtils.isAssignable(optional, erasure);
+        if (!optionalItem) {
+            jacksonAnnotationBuilder.addMember("required", "true");
+        }
+
+        AnnotationSpec jacksonAnnotation = jacksonAnnotationBuilder.build();
 
         // create the override accessor method
         MethodSpec implementedMethod = MethodSpec.overriding(method)
@@ -367,7 +378,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
                 .addField(field)
                 .addMethod(implementedMethod);
 
-        return new Variable(returnTypeName, memberVariableName);
+        return new Variable(returnTypeName, memberVariableName, !optionalItem);
     }
 
     private String loadClassName(AutoJackson annotation) {
@@ -391,18 +402,24 @@ public class AutoJacksonProcessor extends AbstractProcessor {
     private class Variable {
         private final TypeName typeName;
         private final String variableName;
+        private final boolean required;
 
-        private Variable(TypeName typeName, String variableName) {
+        private Variable(TypeName typeName, String variableName, boolean required) {
             this.typeName = typeName;
             this.variableName = variableName;
+            this.required = required;
         }
 
         private String getVariableName() {
-            return variableName;
+            return this.variableName;
         }
 
         private TypeName getTypeName() {
-            return typeName;
+            return this.typeName;
+        }
+
+        public boolean isRequired() {
+            return this.required;
         }
     }
 }

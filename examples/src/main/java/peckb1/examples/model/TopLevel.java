@@ -33,14 +33,14 @@ public interface TopLevel {
 
     // ----------- lists -----------
     @Named("c_list") List<RecursiveConcrete> getConcreteList();
-    @Named("v_list") List<RecursiveVariable> getVariableList();
+    @Named("v_list") Optional<List<RecursiveVariable>> getVariableList();
     @Named("e_list") List<SecondEnum> getEnumList();
-    @Named("p_list") List<String> getStringList();
+    @Named("p_list") Optional<List<String>> getStringList();
 
     // ----------- arrays -----------
-    @Named("c_array") RecursiveConcrete[] getConcreteArray();
+    @Named("c_array") Optional<RecursiveConcrete[]> getConcreteArray();
     @Named("v_array") RecursiveVariable[] getVariableArray();
-    @Named("e_array") SecondEnum[] getEnumArray();
+    @Named("e_array") Optional<SecondEnum[]> getEnumArray();
     @Named("p_array") String[] getStringArray();
 
 }

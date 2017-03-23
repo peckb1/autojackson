@@ -13,5 +13,9 @@
     "value": 87,
     "name": "ourName",
     "fires" : 9001
-  }
+  },
+  "c_list" : [],
+  "e_list" : [],
+  "v_array" : [],
+  "p_array" : []
 }

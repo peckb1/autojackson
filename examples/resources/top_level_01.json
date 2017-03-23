@@ -5,12 +5,13 @@
   "ft": 1490230029,
   "st": 1490230029,
   "mc": {
-    "value": "myValue",
+    "value": 14,
     "name": "myName"
   },
   "mv": {
     "type": "WEMBLEY",
-    "value": "ourValue",
-    "name": "ourName"
+    "value": 87,
+    "name": "ourName",
+    "fires" : 9001
   }
 }

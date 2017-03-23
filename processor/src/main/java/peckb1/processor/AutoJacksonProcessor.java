@@ -5,8 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
@@ -47,6 +51,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,24 +108,97 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             String annotationTypeName = loadClassName(annotation);
             if (annotationTypeName.equals(NoTypeEnum.class.getCanonicalName())) {
                 generateDefaultImplementation(typeElement);
-                // TODO generate the simple custom validator
-                generateSimpleCustomDeserializer(typeElement);
+                generateCustomDeserializer(typeElement, generateSimpleDeserializerLogic(typeElement));
             } else {
-                // TODO generate the complex custom validator
-//                System.out.println("Non concrete for " + typeElement.getSimpleName());
+                generateCustomDeserializer(typeElement, generateTypeDeserializerLogic(typeElement));
             }
 
         }
 
-        ImmutableList<TypeElement> ourElements = ourElementsBuilder.build();
-        if (!ourElements.isEmpty()) {
+//        ImmutableList<TypeElement> ourElements = ourElementsBuilder.build();
+//        if (!ourElements.isEmpty()) {
 //            System.out.println(ourElements);
-        }
+//        }
 
         return false;
     }
 
-    private void generateSimpleCustomDeserializer(TypeElement typeElement) {
+    private Consumer<MethodSpec.Builder> generateTypeDeserializerLogic(TypeElement typeElement) {
+        AutoJackson annotation = typeElement.getAnnotation(AutoJackson.class);
+        TypeElement enumTypeElement;
+        try {
+            Class<?> clazz = annotation.type().value();
+            enumTypeElement = this.elementUtils.getTypeElement(clazz.getCanonicalName());
+        } catch (MirroredTypeException mte) {
+            DeclaredType classTypeMirror = (DeclaredType) mte.getTypeMirror();
+            enumTypeElement = (TypeElement) classTypeMirror.asElement();
+        }
+
+        final TypeElement finalEnumElement = enumTypeElement;
+
+        if (enumTypeElement.getKind() != ElementKind.ENUM) {
+            error(enumTypeElement, "The type of object for %s must be an enum", AutoJackson.Type.class.getSimpleName());
+            return method -> method.addStatement("return null");
+        }
+
+        ImmutableList.Builder<Element> constantElementsBuilder = ImmutableList.builder();
+        ImmutableList.Builder<ExecutableElement> accessorMethodBuilder = ImmutableList.builder();
+
+        List<? extends Element> enclosedElements = enumTypeElement.getEnclosedElements();
+        enclosedElements.forEach(enclosedElement -> {
+            if (enclosedElement.getKind() == ElementKind.ENUM_CONSTANT) {
+                constantElementsBuilder.add(enclosedElement);
+            }
+            if (enclosedElement.getAnnotation(AutoJacksonTypeClass.class) != null && enclosedElement.getKind() == ElementKind.METHOD) {
+                accessorMethodBuilder.add((ExecutableElement) enclosedElement);
+            }
+        });
+
+        ImmutableList<Element> enumValueElements = constantElementsBuilder.build();
+        ImmutableList<ExecutableElement> enumAccessorElement = accessorMethodBuilder.build();
+
+        if (enumValueElements.isEmpty()) {
+            error(enumTypeElement, "The enum inside the type must have some values");
+            return method -> method.addStatement("return null");
+        }
+
+        if (enumAccessorElement.size() != 1) {
+            error(enumTypeElement, "No accessor method inside enumeration with %s annotaiton", AutoJacksonTypeClass.class);
+            return method -> method.addStatement("return null");
+        }
+
+        return method -> {
+            method.addStatement("$T codec = jp.getCodec()", ObjectCodec.class)
+                    .addStatement("$T rootNode = codec.readTree(jp)", JsonNode.class)
+                    .addStatement("$T typeNode = rootNode.get(\"type\")", JsonNode.class) // TODO get "type" from the correct spot
+                    .beginControlFlow("if (typeNode == null)")
+                    .addStatement("$T javaType = dc.constructType($T.$L)", JavaType.class, finalEnumElement, "class")
+                    .addStatement("throw new $T(jp, String.format(\"%s not present\", $T.$L.$L), javaType, null)", InvalidTypeIdException.class, finalEnumElement, "class", "getSimpleName()")
+                    .endControlFlow()
+                    .addStatement("$T type = codec.treeToValue(typeNode, $T.$L)", finalEnumElement, finalEnumElement, "class")
+                    .beginControlFlow("switch (type)");
+
+            enumValueElements.forEach(enumValueElement -> {
+                method.addCode("case $L:\n", enumValueElement);
+                method.addStatement("return codec.treeToValue(rootNode, $T.$L.$L)", finalEnumElement, enumValueElement, enumAccessorElement.get(0));
+            });
+
+            method.endControlFlow()
+                    .addStatement("return null");
+        };
+    }
+
+    private Consumer<MethodSpec.Builder> generateSimpleDeserializerLogic(TypeElement typeElement) {
+
+        Name className = typeElement.getSimpleName();
+
+        return method -> method
+                .addStatement("$T codec = jp.getCodec()", ObjectCodec.class)
+                .addStatement("$T rootNode = codec.readTree(jp)", JsonNode.class)
+                .addStatement("return codec.treeToValue(rootNode, $L_AutoJacksonImpl.$L)", className, "class");
+    }
+
+    private void generateCustomDeserializer(TypeElement typeElement, Consumer<MethodSpec.Builder> addLogicConsumer) {
         Name className = typeElement.getSimpleName();
 
 
@@ -137,20 +215,20 @@ public class AutoJacksonProcessor extends AbstractProcessor {
                 .addStatement("super($T.$L)", typeElement, "class")
                 .build();
 
-        MethodSpec deserialize = MethodSpec.methodBuilder("deserialize")
+        MethodSpec.Builder deserializeBuilder = MethodSpec.methodBuilder("deserialize")
                 .addParameter(ParameterSpec.builder(JsonParser.class, "jp").build())
                 .addParameter(ParameterSpec.builder(DeserializationContext.class, "dc").build())
                 .addAnnotation(Override.class)
                 .addException(ClassName.get(IOException.class))
                 .addException(ClassName.get(JsonProcessingException.class))
                 .returns(TypeName.get(declaredType))
-                .addModifiers(Modifier.PUBLIC)
-                .addStatement("return null") // TODO fill in deserializer
-                .build();
+                .addModifiers(Modifier.PUBLIC);
+
+        addLogicConsumer.accept(deserializeBuilder);
 
         deserializationBuilder
                 .addMethod(constructor)
-                .addMethod(deserialize);
+                .addMethod(deserializeBuilder.build());
 
         // create the javaFile object
         PackageElement packageElement = this.elementUtils.getPackageOf(typeElement);
@@ -229,6 +307,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
             AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
                     .addMember("value", "$L", staticName)
+                    // TODO .addMember("required", "true")
                     .build();
 
             ParameterSpec parameter = ParameterSpec.builder(typeName, variableName)
@@ -260,6 +339,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
         AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
                 .addMember("value", "$L", staticName)
+                // TODO .addMember("required", "true")
                 .build();
 
         // create the override accessor method

@@ -7,6 +7,6 @@ import peckb1.processor.Named;
 @AutoJackson
 public interface Wembley extends RecursiveVariable {
 
-    @Named("fires") int getNumberOfFiresPutOut();
+    @Named("fires") Integer getNumberOfFiresPutOut();
 
 }

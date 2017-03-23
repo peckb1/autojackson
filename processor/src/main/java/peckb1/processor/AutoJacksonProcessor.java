@@ -1,10 +1,16 @@
 package peckb1.processor;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Sets;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
@@ -98,17 +104,19 @@ public class AutoJacksonProcessor extends AbstractProcessor {
     private void generateDefaultImplementation(TypeElement typeElement) {
         Name className = typeElement.getSimpleName();
 
+        AnnotationSpec nonEmptyJsonAnnotation = AnnotationSpec.builder(JsonInclude.class)
+                .addMember("value", "$T.$L", Include.class, Include.NON_EMPTY)
+                .build();
+
         // create the class that implements our interface
         Builder autoJacksonDefaultBuilder = TypeSpec
                 .classBuilder(String.format("%s_AutoJacksonDefault", className))
                 .addSuperinterface(ClassName.get(typeElement))
+                .addAnnotation(nonEmptyJsonAnnotation)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
         List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
-        System.out.println();
-        System.out.println(typeElement);
         Stream<? extends Element> interfaceElements = interfaces.stream().flatMap(interfaceTypeMirror -> {
-            System.out.println(interfaceTypeMirror);
             Element element = this.typeUtils.asElement(interfaceTypeMirror);
             return element.getEnclosedElements().stream();
         });
@@ -151,7 +159,16 @@ public class AutoJacksonProcessor extends AbstractProcessor {
         memberVariables.forEach(memberVariable -> {
             TypeName typeName = memberVariable.getTypeName();
             String variableName = memberVariable.getVariableName();
-            constructorBuilder.addParameter(typeName, variableName);
+
+            AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
+                    .addMember("value", "$S", variableName)
+                    .build();
+
+            ParameterSpec parameter = ParameterSpec.builder(typeName, variableName)
+                    .addAnnotation(jacksonAnnotation)
+                    .build();
+
+            constructorBuilder.addParameter(parameter);
             constructorBuilder.addStatement("this.$N = $N", variableName, variableName);
         });
 
@@ -172,6 +189,10 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             memberVariableName = methodName.substring("get".length(), methodName.length()).toLowerCase(); // TODO validate `method.getSimpleName()` is in the format `getXXX()`
         }
 
+        AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$S", memberVariableName)
+                .build();
+
         // create the accessor method
         MethodSpec implementedMethod = MethodSpec.methodBuilder(method.getSimpleName().toString())
                 .addModifiers(Modifier.PUBLIC)
@@ -179,9 +200,14 @@ public class AutoJacksonProcessor extends AbstractProcessor {
                 .addStatement("return this.$N", memberVariableName)
                 .build();
 
-        // add the field and method which will use the new member variable
+        // create the field
+        FieldSpec field = FieldSpec.builder(returnTypeName, memberVariableName, Modifier.PRIVATE, Modifier.FINAL)
+                .addAnnotation(jacksonAnnotation)
+                .build();
+
+        // add the field and method which will use the new field
         autoJacksonDefaultBuilder
-                .addField(returnTypeName, memberVariableName, Modifier.PRIVATE, Modifier.FINAL)
+                .addField(field)
                 .addMethod(implementedMethod);
 
         return new Variable(returnTypeName, memberVariableName);

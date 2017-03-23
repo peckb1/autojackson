@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.service.AutoService;
+import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -75,6 +77,8 @@ public class AutoJacksonProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         // Itearate over all @AutoJackson annotated elements
+        ImmutableList.Builder<TypeElement> ourElementsBuilder = ImmutableList.builder();
+
         for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(AutoJackson.class)) {
 
             // Check if an interface  has been annotated with @Factory
@@ -85,6 +89,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
             // We can cast it, because we know that it of ElementKind.INTERFACE
             TypeElement typeElement = (TypeElement) annotatedElement;
+            ourElementsBuilder.add(typeElement);
 
             // grab our annotation to get at the details
             AutoJackson annotation = typeElement.getAnnotation(AutoJackson.class);
@@ -96,6 +101,11 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             } else {
                 System.out.println("Non concrete for " + typeElement.getSimpleName());
             }
+        }
+
+        ImmutableList<TypeElement> ourElements = ourElementsBuilder.build();
+        if (!ourElements.isEmpty()) {
+            System.out.println(ourElements);
         }
 
         return false;
@@ -110,7 +120,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
         // create the class that implements our interface
         Builder autoJacksonDefaultBuilder = TypeSpec
-                .classBuilder(String.format("%s_AutoJacksonDefault", className))
+                .classBuilder(String.format("%s_AutoJacksonImpl", className))
                 .addSuperinterface(ClassName.get(typeElement))
                 .addAnnotation(nonEmptyJsonAnnotation)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -136,7 +146,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
                 .collect(Collectors.toList());
 
         // create the constructor that assigns those member variables
-        autoJacksonDefaultBuilder.addMethod(createConstructor(memberVariables, autoJacksonDefaultBuilder));
+        autoJacksonDefaultBuilder.addMethod(createConstructor(memberVariables));
 
         // create the javaFile object
         PackageElement packageElement = this.elementUtils.getPackageOf(typeElement);
@@ -152,7 +162,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
         }
     }
 
-    private MethodSpec createConstructor(List<Variable> memberVariables, Builder autoJacksonDefaultBuilder) {
+    private MethodSpec createConstructor(List<Variable> memberVariables) {
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC);
 
@@ -160,8 +170,10 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             TypeName typeName = memberVariable.getTypeName();
             String variableName = memberVariable.getVariableName();
 
+            String staticName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, variableName);
+
             AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
-                    .addMember("value", "$S", variableName)
+                    .addMember("value", "$L", staticName)
                     .build();
 
             ParameterSpec parameter = ParameterSpec.builder(typeName, variableName)
@@ -189,8 +201,10 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             memberVariableName = methodName.substring("get".length(), methodName.length()).toLowerCase(); // TODO validate `method.getSimpleName()` is in the format `getXXX()`
         }
 
+        String staticName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, memberVariableName);
+
         AnnotationSpec jacksonAnnotation = AnnotationSpec.builder(JsonProperty.class)
-                .addMember("value", "$S", memberVariableName)
+                .addMember("value", "$L", staticName)
                 .build();
 
         // create the accessor method
@@ -205,8 +219,15 @@ public class AutoJacksonProcessor extends AbstractProcessor {
                 .addAnnotation(jacksonAnnotation)
                 .build();
 
+
+        // create the field
+        FieldSpec constant = FieldSpec.builder(String.class, staticName, Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$S", memberVariableName)
+                .build();
+
         // add the field and method which will use the new field
         autoJacksonDefaultBuilder
+                .addField(constant)
                 .addField(field)
                 .addMethod(implementedMethod);
 

@@ -13,7 +13,11 @@ public class Driver {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
+//        SimpleModule deserialzationModule = new SimpleModule();
+//        deserialzationModule.addDeserializer(TopLevel.class, new TopLevel_AutoJacksonDeserializer());
 //        TopLevel_Configuration.configure(objectMapper);
+
+
         File topLevel01File = new File("examples/resources/top_level_01.json");
         File topLevel02File = new File("examples/resources/top_level_02.json");
         File topLevel03File = new File("examples/resources/top_level_03.json");

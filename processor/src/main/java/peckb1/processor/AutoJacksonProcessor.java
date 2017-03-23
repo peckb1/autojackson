@@ -329,10 +329,13 @@ public class AutoJacksonProcessor extends AbstractProcessor {
         final String memberVariableName;
         Named namedAnnotation = method.getAnnotation(Named.class);
         if (namedAnnotation != null) {
-            memberVariableName = namedAnnotation.value(); // TODO validate `namedAnnotation.value()` is a valid member variable name
+            memberVariableName = namedAnnotation.value(); // the error message for an invalid name is verbose enough to not manually check
         } else {
             String methodName = method.getSimpleName().toString();
-            memberVariableName = methodName.substring("get".length(), methodName.length()).toLowerCase(); // TODO validate `method.getSimpleName()` is in the format `getXXX()`
+            if (!methodName.startsWith("get")) {
+                error(method, "Method name %s must be in the format 'getXXX()' if no %s parameter is given", methodName, Named.class);
+            }
+            memberVariableName = methodName.substring("get".length(), methodName.length()).toLowerCase();
         }
 
         String staticName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, memberVariableName);

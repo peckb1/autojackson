@@ -3,6 +3,10 @@ package peckb1.processor;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
@@ -13,6 +17,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
@@ -98,17 +103,67 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             String annotationTypeName = loadClassName(annotation);
             if (annotationTypeName.equals(NoTypeEnum.class.getCanonicalName())) {
                 generateDefaultImplementation(typeElement);
+                // TODO generate the simple custom validator
+                generateSimpleCustomDeserializer(typeElement);
             } else {
-                System.out.println("Non concrete for " + typeElement.getSimpleName());
+                // TODO generate the complex custom validator
+//                System.out.println("Non concrete for " + typeElement.getSimpleName());
             }
+
         }
 
         ImmutableList<TypeElement> ourElements = ourElementsBuilder.build();
         if (!ourElements.isEmpty()) {
-            System.out.println(ourElements);
+//            System.out.println(ourElements);
         }
 
         return false;
+    }
+
+    private void generateSimpleCustomDeserializer(TypeElement typeElement) {
+        Name className = typeElement.getSimpleName();
+
+
+        DeclaredType declaredType = this.typeUtils.getDeclaredType(typeElement);
+        ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(StdDeserializer.class), TypeName.get(declaredType));
+
+        Builder deserializationBuilder = TypeSpec
+                .classBuilder(String.format("%s_AutoJacksonDeserializer", className))
+                .superclass(parameterizedTypeName)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+        MethodSpec constructor = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("super($T.$L)", typeElement, "class")
+                .build();
+
+        MethodSpec deserialize = MethodSpec.methodBuilder("deserialize")
+                .addParameter(ParameterSpec.builder(JsonParser.class, "jp").build())
+                .addParameter(ParameterSpec.builder(DeserializationContext.class, "dc").build())
+                .addAnnotation(Override.class)
+                .addException(ClassName.get(IOException.class))
+                .addException(ClassName.get(JsonProcessingException.class))
+                .returns(TypeName.get(declaredType))
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("return null") // TODO fill in deserializer
+                .build();
+
+        deserializationBuilder
+                .addMethod(constructor)
+                .addMethod(deserialize);
+
+        // create the javaFile object
+        PackageElement packageElement = this.elementUtils.getPackageOf(typeElement);
+        JavaFile javaFile = JavaFile
+                .builder(packageElement.getQualifiedName().toString(), deserializationBuilder.build())
+                .build();
+
+        // and write that file to disc
+        try {
+            javaFile.writeTo(this.filer);
+        } catch (IOException e) {
+            error(typeElement, e.getMessage());
+        }
     }
 
     private void generateDefaultImplementation(TypeElement typeElement) {
@@ -207,10 +262,8 @@ public class AutoJacksonProcessor extends AbstractProcessor {
                 .addMember("value", "$L", staticName)
                 .build();
 
-        // create the accessor method
-        MethodSpec implementedMethod = MethodSpec.methodBuilder(method.getSimpleName().toString())
-                .addModifiers(Modifier.PUBLIC)
-                .returns(returnTypeName)
+        // create the override accessor method
+        MethodSpec implementedMethod = MethodSpec.overriding(method)
                 .addStatement("return this.$N", memberVariableName)
                 .build();
 

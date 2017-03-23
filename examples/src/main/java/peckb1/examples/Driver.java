@@ -2,7 +2,9 @@ package peckb1.examples;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import peckb1.examples.model.TopLevel;
+import peckb1.examples.model.TopLevel_AutoJacksonDeserializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,10 +15,9 @@ public class Driver {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-//        SimpleModule deserialzationModule = new SimpleModule();
-//        deserialzationModule.addDeserializer(TopLevel.class, new TopLevel_AutoJacksonDeserializer());
-//        TopLevel_Configuration.configure(objectMapper);
-
+        SimpleModule deserialzationModule = new SimpleModule();
+        deserialzationModule.addDeserializer(TopLevel.class, new TopLevel_AutoJacksonDeserializer());
+        objectMapper.registerModule(deserialzationModule);
 
         File topLevel01File = new File("examples/resources/top_level_01.json");
         File topLevel02File = new File("examples/resources/top_level_02.json");

@@ -34,6 +34,7 @@ public class Driver {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         SimpleModule deserialzationModule = new SimpleModule();
+        // TODO create single configuration which contains at least the visibility and deserializers
         deserialzationModule.addDeserializer(TopLevel.class, new TopLevel_AutoJacksonDeserializer());
         deserialzationModule.addDeserializer(RecursiveConcrete.class, new RecursiveConcrete_AutoJacksonDeserializer());
         deserialzationModule.addDeserializer(RecursiveVariable.class, new RecursiveVariable_AutoJacksonDeserializer());
@@ -43,8 +44,9 @@ public class Driver {
         deserialzationModule.addDeserializer(Red.class, new Red_AutoJacksonDeserializer());
         deserialzationModule.addDeserializer(Wembley.class, new Wembley_AutoJacksonDeserializer());
         objectMapper.registerModule(deserialzationModule);
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new Jdk8Module());
+
+        objectMapper.registerModule(new JavaTimeModule()); // maybe require user to specify
+        objectMapper.registerModule(new Jdk8Module()); // maybe require the user to specify
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
 
         File topLevel01File = new File("examples/resources/top_level_01.json");

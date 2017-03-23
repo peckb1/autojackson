@@ -1,0 +1,16 @@
+{
+  "mp01": "a String",
+  "mp02": 867530912345,
+  "fe": "BERT",
+  "ft": 1490230029,
+  "st": 1490230029,
+  "mc": {
+    "value": "myValue",
+    "name": "myName"
+  },
+  "mv": {
+    "type": "WEMBLEY",
+    "value": "ourValue",
+    "name": "ourName"
+  }
+}

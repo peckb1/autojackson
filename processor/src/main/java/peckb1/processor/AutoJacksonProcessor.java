@@ -3,7 +3,10 @@ package peckb1.processor;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import peckb1.processor.util.ComplexDeserializerCreator;
+import peckb1.processor.util.ImplementationCreator;
 import peckb1.processor.util.ProcessorUtil;
+import peckb1.processor.util.SimpleDeserializerCreator;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -37,23 +40,24 @@ import java.util.Set;
 @AutoService(Processor.class)
 public class AutoJacksonProcessor extends AbstractProcessor {
 
-    private Types typeUtils;
-    private Elements elementUtils;
-    private Filer filer;
-    private Messager messager;
-
     private ImplementationCreator implementationCreator;
     private ProcessorUtil processorUtil;
+    private SimpleDeserializerCreator simpleDeserializerCreator;
+    private ComplexDeserializerCreator complexDeserializerCreator;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.typeUtils = processingEnv.getTypeUtils();
-        this.elementUtils = processingEnv.getElementUtils();
-        this.filer = processingEnv.getFiler();
-        this.messager = processingEnv.getMessager();
-        this.implementationCreator = new ImplementationCreator(this.typeUtils, this.elementUtils, this.filer, this.messager);
-        this.processorUtil = new ProcessorUtil(this.elementUtils, this.messager);
+
+        final Types typeUtils = processingEnv.getTypeUtils();
+        final Elements elementUtils = processingEnv.getElementUtils();
+        final Filer filer = processingEnv.getFiler();
+        final Messager messager = processingEnv.getMessager();
+
+        this.processorUtil = new ProcessorUtil(elementUtils, messager);
+        this.implementationCreator = new ImplementationCreator(typeUtils, elementUtils, filer, this.processorUtil);
+        this.simpleDeserializerCreator = new SimpleDeserializerCreator(typeUtils, elementUtils, filer, this.processorUtil);
+        this.complexDeserializerCreator = new ComplexDeserializerCreator(typeUtils, elementUtils, filer, this.processorUtil);
     }
 
     @Override
@@ -86,9 +90,9 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             AutoJackson annotation = typeElement.getAnnotation(AutoJackson.class);
             if (isSimpleClass(annotation)) {
                 this.implementationCreator.implementInterface(typeElement);
-                // TODO simple deserializer
+                this.simpleDeserializerCreator.createDeserializer(typeElement);
             } else {
-                // TODO complex deserializer
+                this.complexDeserializerCreator.createDeserializer(typeElement);
             }
         });
 

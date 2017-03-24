@@ -1,4 +1,4 @@
-package peckb1.processor;
+package peckb1.processor.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -12,10 +12,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import peckb1.processor.util.ProcessorUtil;
+import peckb1.processor.Named;
 
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -31,9 +30,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ImplementationCreator {
+public class ImplementationCreator {
 
-    private final static String CLASS_IMPLEMENTATION_NAME_SUFFIX = "_AutoJacksonImpl";
+    public final static String CLASS_IMPLEMENTATION_NAME_SUFFIX = "_AutoJacksonImpl";
+
     private final static String USUAL_ACCESSOR_PREFIX = "get";
 
     private final Types typeUtils;
@@ -41,14 +41,14 @@ class ImplementationCreator {
     private final Filer filer;
     private final ProcessorUtil processorUtil;
 
-    ImplementationCreator(Types typeUtils, Elements elementUtils, Filer filer, Messager messager) {
+    public ImplementationCreator(Types typeUtils, Elements elementUtils, Filer filer, ProcessorUtil processorUtil) {
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
         this.filer = filer;
-        this.processorUtil = new ProcessorUtil(elementUtils, messager);
+        this.processorUtil = processorUtil;
     }
 
-    void implementInterface(TypeElement typeElement) {
+    public void implementInterface(TypeElement typeElement) {
         Name className = typeElement.getSimpleName();
 
         // class level annotation to only deserialize existent objects

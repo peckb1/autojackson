@@ -25,15 +25,15 @@ import java.io.IOException;
 
 abstract class DeserializerCreator {
 
-    private final static String DESERIALIZER_CLASS_NAME_SUFFIX = "_AutoJacksonDeserializer";
-
+    final static String DESERIALIZER_CLASS_NAME_SUFFIX = "_AutoJacksonDeserializer";
     final static String JSON_PARSER_PARAMETER_NAME = "jsonParser";
     final static String DESERIALIZATION_CONTEXT_PARAMETER_NAME = "context";
 
     final Types typeUtils;
-    final Elements elementUtils;
-    final Filer filer;
     final ProcessorUtil processorUtil;
+
+    private final Elements elementUtils;
+    private final Filer filer;
 
     DeserializerCreator(Types typeUtils, Elements elementUtils, Filer filer, ProcessorUtil processorUtil) {
         this.typeUtils = typeUtils;

@@ -32,8 +32,8 @@ public interface Sample {
     Gorg[] getGorgArray();
 
     // timestamps
-    @Named("startMillis") Instant getStartTime();
-    @Named("endMillis") Date getEndTime();
+    @Named("start") Instant getStartTime();
+    @Named("end") Date getEndTime();
 
     // Optionals
     Optional<String> getOptionalString();

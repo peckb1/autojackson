@@ -12,7 +12,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import peckb1.processor.Named;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;

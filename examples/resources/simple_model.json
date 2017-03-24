@@ -2,15 +2,17 @@
   "string": "A String",
   "intPrimitive": 1,
   "booleanPrimitive": true,
-  "muppet": "KERMIT",
+  "muppet": "GONZO",
   "fraggle": {
     "name": "GOBO",
     "age": 10,
     "occupation": "singer",
-    "roomate": {
+    "postcards" : 20,
+    "roommate": {
       "name": "WEMBLEY",
       "age": 9,
-      "occupation": "fire truck siren"
+      "occupation": "fire truck siren",
+      "fires" : 15
     }
   },
   "gorg": {
@@ -29,24 +31,28 @@
     {
       "name": "MOKEY",
       "age": 11,
-      "occupation": "radish picker"
+      "occupation": "radish picker",
+      "radishes" : 500
     },
     {
       "name": "BOOBER",
       "age": 11,
-      "occupation": "clothes washer"
+      "occupation": "clothes washer",
+      "superstitions" : 9001
     }
   ],
   "fraggleArray": [
     {
       "name": "BOOBER",
       "age": 11,
-      "occupation": "clothes washer"
+      "occupation": "clothes washer",
+      "superstitions" : 9001
     },
     {
       "name": "MOKEY",
       "age": 11,
-      "occupation": "radish picker"
+      "occupation": "radish picker",
+      "radishes" : 500
     }
   ],
   "gorgList": [
@@ -86,5 +92,5 @@
     }
   ],
   "start": 946684800,
-  "end": 978307200
+  "end": 978307200000
 }

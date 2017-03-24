@@ -63,6 +63,18 @@ public class ComplexDeserializerCreator extends DeserializerCreator {
                 .build();
     }
 
+    /**
+     * Loads the constructs needed to create the implementation of the deserialization method
+     * <br></br>
+     * This method was split out to essentially handle all of the validation needed to perform
+     * before the complex deserialization class can be implemented.
+     * <br></br>
+     * After this method has been called any needed constructs should be returned, or no
+     * data returned, with any applicable errors already logged.
+     *
+     * @param typeElement The main interface being deserialized
+     * @return An optional containing the needed constructs if no errors were found
+     */
     private Optional<DeserializationConstructs> loadConstructs(TypeElement typeElement) {
         TypeElement enumTypeElement = this.processorUtil.getTypeElement(typeElement.getAnnotation(AutoJackson.class));
 
@@ -110,24 +122,26 @@ public class ComplexDeserializerCreator extends DeserializerCreator {
      * <p>
      * Loads the method from inside our class needing a custom deserializer which
      * is used to find out the type of class needed.
-     * </p><p>
+     * </p>
+     * <p>
      * For example if the following class was given as the TypeElement, and FraggleName was given
      * as the enumTypeElement then `FraggleName getName()` would be the ExecutableElement returned
      * </p>
-     * {@code
+     * <pre>
+     * {@code @AutoJackson(type = @AutoJackson.Type(FraggleName.class))
+     *   public interface Fraggle {
+     *     FraggleName getName();
+     *    @code @Named("occupation") String getJob();
+     *     enum FraggleName {
+     *       ...
+     *     }
+     *   }
+     * }
+     * </pre>
      *
      * @param typeElement     The class containing the methods to return
      * @param enumTypeElement The return type to look for in the method
      * @return An Optional containing the single method returning the given type, if only 1 is found.
-     * @AutoJackson(type = @AutoJackson.Type(FraggleName.class))
-     * public interface Fraggle {
-     * FraggleName getName();
-     * @Named("occupation") String getJob();
-     * enum FraggleName {
-     * ...
-     * }
-     * }
-     * }
      */
     private Optional<ExecutableElement> loadEnumMethod(TypeElement typeElement, TypeElement enumTypeElement) {
         List<ExecutableElement> methodsReturningEnum = typeElement.getEnclosedElements().stream()

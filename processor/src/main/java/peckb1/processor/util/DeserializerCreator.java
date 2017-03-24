@@ -23,6 +23,11 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.io.IOException;
 
+/**
+ * The parent class for creating the custom deserializer objects
+ * used by Jackson to create the instances of the interfaces
+ * annotated by our {@link peckb1.processor.AutoJackson} annotation.
+ */
 abstract class DeserializerCreator {
 
     final static String DESERIALIZER_CLASS_NAME_SUFFIX = "_AutoJacksonDeserializer";
@@ -42,6 +47,14 @@ abstract class DeserializerCreator {
         this.processorUtil = processorUtil;
     }
 
+    /**
+     * Creates a custom Jackson deserializer for the given
+     * {@link TypeElement}. Filling out the logic of the actual
+     * deserialize method using the {@link #implementDeserializeMethod(TypeElement, Builder)}
+     * method implemented by our subclasses.
+     *
+     * @param typeElement The interface to create a custom deserializer for
+     */
     public void createDeserializer(TypeElement typeElement) {
         Name className = typeElement.getSimpleName();
 
@@ -92,5 +105,16 @@ abstract class DeserializerCreator {
         }
     }
 
+    /**
+     * Implement the logic for the deserialize method.
+     * <br></br>
+     * The method definition (parameters, modifiers, return type, etc...) are
+     * created a head of time as the method is implementing an interface and
+     * does not change based on implementation.
+     *
+     * @param typeElement              The class needed to create an instance of
+     * @param deserializeMethodBuilder The method builder already setup, only missing the implementation
+     * @return A full method ready to be added to a class using JavaPoet
+     */
     protected abstract MethodSpec implementDeserializeMethod(TypeElement typeElement, Builder deserializeMethodBuilder);
 }

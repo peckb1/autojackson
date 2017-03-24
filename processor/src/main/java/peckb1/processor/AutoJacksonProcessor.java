@@ -1,16 +1,22 @@
 package peckb1.processor;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
@@ -115,12 +121,51 @@ public class AutoJacksonProcessor extends AbstractProcessor {
 
         }
 
-//        ImmutableList<TypeElement> ourElements = ourElementsBuilder.build();
-//        if (!ourElements.isEmpty()) {
-//            System.out.println(ourElements);
-//        }
+        ImmutableList<TypeElement> ourElements = ourElementsBuilder.build();
+        if (!ourElements.isEmpty()) {
+            generateDeserializerModule(ourElements);
+        }
 
         return false;
+    }
+
+    private void generateDeserializerModule(ImmutableList<TypeElement> ourElements) {
+        Builder moduleBuilder = TypeSpec
+                .classBuilder("AutoJacksonSetup")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+        MethodSpec constructor = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .build();
+
+        MethodSpec.Builder moduleGenerator = MethodSpec.methodBuilder("configureObjectMapper")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(ParameterSpec.builder(ObjectMapper.class, "objectMapper").build())
+                .addStatement("$T deserialzationModule = new $T()", SimpleModule.class, SimpleModule.class);
+
+        ourElements.forEach(element -> {
+            moduleGenerator.addStatement("deserialzationModule.addDeserializer($T.$L, new $L_$L())",
+                    element, "class", element, "AutoJacksonDeserializer");
+        });
+        moduleGenerator
+                .addStatement("objectMapper.registerModule(deserialzationModule)")
+                .addStatement("objectMapper.setVisibility($T.$L, $T.$L)", PropertyAccessor.class, PropertyAccessor.ALL, JsonAutoDetect.Visibility.class, Visibility.NONE)
+                .build();
+
+        moduleBuilder
+                .addMethod(constructor)
+                .addMethod(moduleGenerator.build());
+        // create the javaFile object
+        JavaFile javaFile = JavaFile
+                .builder("peckb1.autojackson", moduleBuilder.build())
+                .build();
+
+        // and write that file to disc
+        try {
+            javaFile.writeTo(this.filer);
+        } catch (IOException e) {
+            error(null, e.getMessage());
+        }
     }
 
     private Consumer<MethodSpec.Builder> generateTypeDeserializerLogic(TypeElement typeElement) {
@@ -418,7 +463,7 @@ public class AutoJacksonProcessor extends AbstractProcessor {
             return this.typeName;
         }
 
-        public boolean isRequired() {
+        private boolean isRequired() {
             return this.required;
         }
     }

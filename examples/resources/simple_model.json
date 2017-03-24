@@ -1,0 +1,46 @@
+{
+  "mp01": "simple model string",
+  "mp02": 867530912345,
+  "fe": "BERT",
+  "ft": 1490230029,
+  "st": 1490230029,
+  "mc": {
+    "value": 1,
+    "name": "mc.name"
+  },
+  "mv": {
+    "type": "WEMBLEY",
+    "value": 2,
+    "name": "mv.name",
+    "fires": 3
+  },
+  "c_list": [
+    {
+      "value": 4,
+      "name": "c_list[0].name"
+    },
+    {
+      "value": 5,
+      "name": "c_list[1].name"
+    }
+  ],
+  "e_list": [
+    "KERMIT",
+    "FOZZIE"
+  ],
+  "v_array": [
+    {
+      "type": "RED",
+      "value": 6,
+      "name": "v_array[0].name",
+      "dives": 7
+    },
+    {
+      "type": "GOBO",
+      "value": 8,
+      "name": "v_array[1].name",
+      "postcards": 9
+    }
+  ],
+  "p_array": ["p_array[0]", "p_array[1]"]
+}

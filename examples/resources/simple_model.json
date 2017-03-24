@@ -1,46 +1,90 @@
 {
-  "mp01": "simple model string",
-  "mp02": 867530912345,
-  "fe": "BERT",
-  "ft": 1490230029,
-  "st": 1490230029,
-  "mc": {
-    "value": 1,
-    "name": "mc.name"
-  },
-  "mv": {
-    "type": "WEMBLEY",
-    "value": 2,
-    "name": "mv.name",
-    "fires": 3
-  },
-  "c_list": [
-    {
-      "value": 4,
-      "name": "c_list[0].name"
-    },
-    {
-      "value": 5,
-      "name": "c_list[1].name"
+  "string": "A String",
+  "intPrimitive": 1,
+  "booleanPrimitive": true,
+  "muppet": "KERMIT",
+  "fraggle": {
+    "name": "GOBO",
+    "age": 10,
+    "occupation": "singer",
+    "roomate": {
+      "name": "WEMBLEY",
+      "age": 9,
+      "occupation": "fire truck siren"
     }
+  },
+  "gorg": {
+    "age": 15,
+    "name": "Junior"
+  },
+  "muppetList": [
+    "MISS_PIGGY",
+    "KERMIT"
   ],
-  "e_list": [
+  "muppetArray": [
     "KERMIT",
-    "FOZZIE"
+    "MISS_PIGGY"
   ],
-  "v_array": [
+  "fraggleList": [
     {
-      "type": "RED",
-      "value": 6,
-      "name": "v_array[0].name",
-      "dives": 7
+      "name": "MOKEY",
+      "age": 11,
+      "occupation": "radish picker"
     },
     {
-      "type": "GOBO",
-      "value": 8,
-      "name": "v_array[1].name",
-      "postcards": 9
+      "name": "BOOBER",
+      "age": 11,
+      "occupation": "clothes washer"
     }
   ],
-  "p_array": ["p_array[0]", "p_array[1]"]
+  "fraggleArray": [
+    {
+      "name": "BOOBER",
+      "age": 11,
+      "occupation": "clothes washer"
+    },
+    {
+      "name": "MOKEY",
+      "age": 11,
+      "occupation": "radish picker"
+    }
+  ],
+  "gorgList": [
+    {
+      "age": 42,
+      "name": "King",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    },
+    {
+      "age": 38,
+      "name": "Queen",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    }
+  ],
+  "gorgArray": [
+    {
+      "age": 38,
+      "name": "Queen",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    },
+    {
+      "age": 42,
+      "name": "King",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    }
+  ],
+  "start": 946684800,
+  "end": 978307200
 }

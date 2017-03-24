@@ -1,0 +1,96 @@
+{
+  "string": "A String",
+  "intPrimitive": 1,
+  "booleanPrimitive": true,
+  "muppet": "GONZO",
+  "fraggle": {
+    "name": "GOBO",
+    "age": 10,
+    "occupation": "singer",
+    "postcards" : 20,
+    "roommate": {
+      "name": "WEMBLEY",
+      "age": 9,
+      "occupation": "fire truck siren",
+      "fires" : 15
+    }
+  },
+  "gorg": {
+    "age": 15,
+    "name": "Junior"
+  },
+  "muppetList": [
+    "MISS_PIGGY",
+    "KERMIT"
+  ],
+  "muppetArray": [
+    "KERMIT",
+    "MISS_PIGGY"
+  ],
+  "fraggleList": [
+    {
+      "name": "MOKEY",
+      "age": 11,
+      "occupation": "radish picker",
+      "radishes" : 500
+    },
+    {
+      "name": "BOOBER",
+      "age": 11,
+      "occupation": "clothes washer",
+      "superstitions" : 9001
+    }
+  ],
+  "fraggleArray": [
+    {
+      "name": "BOOBER",
+      "age": 11,
+      "occupation": "clothes washer",
+      "superstitions" : 9001
+    },
+    {
+      "name": "MOKEY",
+      "age": 11,
+      "occupation": "radish picker",
+      "radishes" : 500
+    }
+  ],
+  "gorgList": [
+    {
+      "age": 42,
+      "name": "King",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    },
+    {
+      "age": 38,
+      "name": "Queen",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    }
+  ],
+  "gorgArray": [
+    {
+      "age": 38,
+      "name": "Queen",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    },
+    {
+      "age": 42,
+      "name": "King",
+      "child": {
+        "age": 15,
+        "name": "Junior"
+      }
+    }
+  ],
+  "start": 946684800,
+  "end": 978307200000
+}

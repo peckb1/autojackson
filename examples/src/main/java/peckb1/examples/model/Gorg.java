@@ -5,10 +5,10 @@ import peckb1.processor.AutoJackson;
 import java.util.Optional;
 
 @AutoJackson
-public interface RecursiveConcrete {
+public interface Gorg {
 
-    Integer getValue();
+    Integer getAge();
     String getName();
-    Optional<RecursiveConcrete> getChild();
+    Optional<Gorg> getChild();
 
 }

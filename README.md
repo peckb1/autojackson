@@ -9,7 +9,9 @@ TODO
 ##### @AutoJacksonTypeClass
 TODO
 ##### @Named
-TODO
+Annotation placed on methods of the interface to expliclty controll the
+JSON key used for that item. If not provided a method in the form of
+`getSuperItem()` is expected, and would default to `superItem`.
 
 ### Usage
 Given the example JSON document

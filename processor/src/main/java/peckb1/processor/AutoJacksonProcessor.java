@@ -24,6 +24,23 @@ import javax.lang.model.util.Types;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Our {@link AutoJackson} annotation processor
+ * <br></br>
+ * Any interface annotated with {@link AutoJackson} will have a custom
+ * deserializer created. If that annotation has a {@link AutoJackson.Type}
+ * given, then a the deserializer will be a bit more complex and use the
+ * child interfaces to match the correct type. If no {@link AutoJackson.Type}
+ * is given, then a simple deserializer is created, as well as a base
+ * implementation class to create an instance of the annotated interface.
+ * <br></br>
+ * After all deserializers, and implementation classes have been created
+ * a single setup class will be created which will modify an
+ * {@link com.fasterxml.jackson.databind.ObjectMapper} to have all of the
+ * required deserializers and Jackson settings needed to create the
+ * annotated interfaces from JSON, and to create JSON from one of those
+ * interfaces' instances.
+ */
 @AutoService(Processor.class)
 public class AutoJacksonProcessor extends AbstractProcessor {
 

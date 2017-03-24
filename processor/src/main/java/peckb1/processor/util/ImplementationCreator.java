@@ -29,9 +29,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * A creator which implements interfaces annotated with {@link peckb1.processor.AutoJackson}
+ * with the needed Jackson annotations to facilitate serialization and deserialization
+ * through an {@link com.fasterxml.jackson.databind.ObjectMapper}
+ */
 public class ImplementationCreator {
 
-    public final static String CLASS_IMPLEMENTATION_NAME_SUFFIX = "_AutoJacksonImpl";
+    final static String CLASS_IMPLEMENTATION_NAME_SUFFIX = "_AutoJacksonImpl";
 
     private final Types typeUtils;
     private final Elements elementUtils;
@@ -45,6 +50,14 @@ public class ImplementationCreator {
         this.processorUtil = processorUtil;
     }
 
+    /**
+     * Creates a Java source file at the same package level of the given
+     * {@link TypeElement} interface which implements it and contains all
+     * of the needed Jackson {@link JsonProperty} annotations for serialization
+     * and deserialization.
+     *
+     * @param typeElement The interface to create the implementation for
+     */
     public void implementInterface(TypeElement typeElement) {
         Name className = typeElement.getSimpleName();
 
@@ -100,6 +113,13 @@ public class ImplementationCreator {
         }
     }
 
+    /**
+     * Creates the {@link JsonProperty} annotation to apply to a parameter, or member variable
+     *
+     * @param returnType   The return type of the item (to check for {@link Optional})
+     * @param constantName The name of the constant which holds our {@link JsonProperty#value()}
+     * @return An Annotation that can be applied using JavaPoet
+     */
     private AnnotationSpec createJsonPropertyAnnotation(TypeMirror returnType, String constantName) {
         TypeMirror optional = this.elementUtils.getTypeElement(Optional.class.getCanonicalName()).asType();
         TypeMirror erasure = this.typeUtils.erasure(returnType);

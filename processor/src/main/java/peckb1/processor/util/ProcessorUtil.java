@@ -14,6 +14,10 @@ import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 
+/**
+ * A utility class for common methods used across the
+ * pieces of the annotation processor
+ */
 public final class ProcessorUtil {
 
     private final static String USUAL_ACCESSOR_PREFIX = "get";
@@ -54,6 +58,29 @@ public final class ProcessorUtil {
         this.messager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args), e);
     }
 
+    /**
+     * Create the member variable name for a given method.
+     * <br></br>
+     * For Example:
+     * <pre>
+     * {@code getSomethingAwesome()}
+     * </pre>
+     * would return
+     * <pre>
+     * {@code somethingAwesome}
+     * </pre>
+     * and
+     * <pre>
+     * {@code @Named("elmo") getSomethingAwesome()}
+     * </pre>
+     * would return
+     * <pre>
+     * {@code elmo}
+     * </pre>
+     *
+     * @param method The method to create a member variable for
+     * @return A String representing the member varaible.
+     */
     public String createMemberVariableName(ExecutableElement method) {
         Named namedAnnotation = method.getAnnotation(Named.class);
         if (namedAnnotation == null) {

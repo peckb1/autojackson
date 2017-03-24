@@ -20,6 +20,16 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.PropertyAccessor.ALL;
 import static peckb1.processor.util.DeserializerCreator.DESERIALIZER_CLASS_NAME_SUFFIX;
 
+/**
+ * Creates a single class that can be used to setup an {@link ObjectMapper}
+ * with the deserializers and Jackson settings needed to allow the
+ * {@link peckb1.processor.AutoJackson} to function correctly.
+ * <br></br>
+ * The class created is only a helper method to avoid the boiler plate of
+ * adding in each deserializer created for each class annotated with
+ * our {@link peckb1.processor.AutoJackson} annotation. But the steps
+ * performed inside can be done manually by the user if wanted.
+ */
 public class SetupCreator {
 
     private final Filer filer;
@@ -36,7 +46,7 @@ public class SetupCreator {
                 .addModifiers(Modifier.PRIVATE)
                 .build();
 
-        MethodSpec.Builder moduleGenerator = MethodSpec.methodBuilder("configureObjectMapper")
+        MethodSpec.Builder configurationMethodBuilder = MethodSpec.methodBuilder("configureObjectMapper")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(ParameterSpec.builder(ObjectMapper.class, "objectMapper").build())
                 .addStatement("$T deserialzationModule = new $T()", SimpleModule.class, SimpleModule.class);
@@ -44,10 +54,10 @@ public class SetupCreator {
         interfaces.forEach(element -> {
             String deserializationPackage = ClassName.get(element).packageName();
             ClassName deserializerClassName = ClassName.get(deserializationPackage, element.getSimpleName() + DESERIALIZER_CLASS_NAME_SUFFIX);
-            moduleGenerator.addStatement("deserialzationModule.addDeserializer($T.class, new $T())", element, deserializerClassName);
+            configurationMethodBuilder.addStatement("deserialzationModule.addDeserializer($T.class, new $T())", element, deserializerClassName);
         });
 
-        moduleGenerator
+        configurationMethodBuilder
                 .addStatement("objectMapper.registerModule(deserialzationModule)")
                 .addStatement("objectMapper.setVisibility($T.$L, $T.$L)", PropertyAccessor.class, ALL, Visibility.class, NONE)
                 .build();
@@ -56,7 +66,7 @@ public class SetupCreator {
                 .classBuilder("AutoJacksonSetup")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(constructor)
-                .addMethod(moduleGenerator.build())
+                .addMethod(configurationMethodBuilder.build())
                 .build();
 
         JavaFile javaFile = JavaFile

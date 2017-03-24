@@ -34,8 +34,6 @@ public class ImplementationCreator {
 
     public final static String CLASS_IMPLEMENTATION_NAME_SUFFIX = "_AutoJacksonImpl";
 
-    private final static String USUAL_ACCESSOR_PREFIX = "get";
-
     private final Types typeUtils;
     private final Elements elementUtils;
     private final Filer filer;
@@ -69,7 +67,7 @@ public class ImplementationCreator {
         methodsStream.forEach(method -> {
             TypeMirror returnType = method.getReturnType();
             TypeName returnTypeName = ClassName.get(returnType);
-            String memberVariableName = createMemberVariableName(method);
+            String memberVariableName = this.processorUtil.createMemberVariableName(method);
             String constantName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, memberVariableName);
             AnnotationSpec jsonPropertyAnnotation = createJsonPropertyAnnotation(returnType, constantName);
 
@@ -115,22 +113,6 @@ public class ImplementationCreator {
         }
 
         return builder.build();
-    }
-
-    private String createMemberVariableName(ExecutableElement method) {
-        Named namedAnnotation = method.getAnnotation(Named.class);
-        if (namedAnnotation == null) {
-            // convert method name to a variable name
-            String methodName = method.getSimpleName().toString();
-            if (methodName.startsWith(USUAL_ACCESSOR_PREFIX)) {
-                String substring = methodName.substring(USUAL_ACCESSOR_PREFIX.length(), methodName.length());
-                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, substring);
-            } else {
-                return methodName;
-            }
-        } else {
-            return namedAnnotation.value();
-        }
     }
 
     /**

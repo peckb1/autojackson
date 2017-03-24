@@ -37,29 +37,30 @@ public class ComplexDeserializerCreator extends DeserializerCreator {
         TypeElement enumTypeElement = constructs.get().getEnumTypeElement();
         ImmutableList<Element> enumValueElements = constructs.get().getEnumValueElements();
         ExecutableElement enumValueAccessorMethod = constructs.get().getEnumValueAccessorMethod();
+        ExecutableElement enumInstanceAccessorMethod = constructs.get().getEnumInstanceAccessorMethod();
+
+        String memberVariableName = this.processorUtil.createMemberVariableName(enumValueAccessorMethod);
 
         deserializeMethodBuilder.addStatement("$T codec = $L.getCodec()", ObjectCodec.class, JSON_PARSER_PARAMETER_NAME)
                 .addStatement("$T rootNode = codec.readTree($L)", JsonNode.class, JSON_PARSER_PARAMETER_NAME)
-                // TODO get "type" from the correct spot
-                .addStatement("$T typeNode = rootNode.get(\"type\")", JsonNode.class)
+                .addStatement("$T typeNode = rootNode.get($S)", JsonNode.class, memberVariableName)
                 .beginControlFlow("if (typeNode == null)")
                 .addStatement("$T javaType = $L.constructType($T.class)", JavaType.class, DESERIALIZATION_CONTEXT_PARAMETER_NAME, enumTypeElement)
-                // TODO finalEnumElement in the `throw` line below is incorrect
-                .addStatement("throw new $T($L, String.format(\"%s not present\", $T.class.getSimpleName()), javaType, null)",
-                        InvalidTypeIdException.class, JSON_PARSER_PARAMETER_NAME, enumTypeElement)
+                .addStatement("throw new $T($L, \"$L not present\", javaType, null)", InvalidTypeIdException.class, JSON_PARSER_PARAMETER_NAME, memberVariableName)
                 .endControlFlow()
                 .addStatement("$T type = codec.treeToValue(typeNode, $T.$L)", enumTypeElement, enumTypeElement, "class")
                 .beginControlFlow("switch (type)");
 
-        enumValueElements.forEach(enumValueElement -> {
-            deserializeMethodBuilder.addCode("case $L:\n", enumValueElement);
-            deserializeMethodBuilder.addStatement("return codec.treeToValue(rootNode, $T.$L.$L)", enumTypeElement, enumValueElement, enumValueAccessorMethod);
-        });
+        enumValueElements.forEach(enumValueElement -> deserializeMethodBuilder
+                .beginControlFlow("case $L:", enumValueElement)
+                .addStatement("return codec.treeToValue(rootNode, $T.$L.$L)", enumTypeElement, enumValueElement, enumInstanceAccessorMethod)
+                .endControlFlow());
 
-        // TODO use the default for the switch rather than this
-        return deserializeMethodBuilder
+        return deserializeMethodBuilder.beginControlFlow("default :")
+                .addStatement("return null")
                 .endControlFlow()
-                .addStatement("return null").build();
+                .endControlFlow()
+                .build();
     }
 
     private Optional<DeserializationConstructs> loadConstructs(TypeElement typeElement) {
@@ -102,7 +103,7 @@ public class ComplexDeserializerCreator extends DeserializerCreator {
             return Optional.empty();
         }
 
-        return Optional.of(new DeserializationConstructs(enumTypeElement, enumValueElements, enumAccessorElement.get(0)));
+        return Optional.of(new DeserializationConstructs(enumTypeElement, enumValueElements, methodReturningEnum.get(), enumAccessorElement.get(0)));
     }
 
     /**
@@ -114,19 +115,19 @@ public class ComplexDeserializerCreator extends DeserializerCreator {
      * as the enumTypeElement then `FraggleName getName()` would be the ExecutableElement returned
      * </p>
      * {@code
-     *  @AutoJackson(type = @AutoJackson.Type(FraggleName.class))
-     *  public interface Fraggle {
-     *      FraggleName getName();
-     *      @Named("occupation") String getJob();
-     *      enum FraggleName {
-     *          ...
-     *      }
-     *  }
-     * }
      *
      * @param typeElement     The class containing the methods to return
      * @param enumTypeElement The return type to look for in the method
      * @return An Optional containing the single method returning the given type, if only 1 is found.
+     * @AutoJackson(type = @AutoJackson.Type(FraggleName.class))
+     * public interface Fraggle {
+     * FraggleName getName();
+     * @Named("occupation") String getJob();
+     * enum FraggleName {
+     * ...
+     * }
+     * }
+     * }
      */
     private Optional<ExecutableElement> loadEnumMethod(TypeElement typeElement, TypeElement enumTypeElement) {
         List<ExecutableElement> methodsReturningEnum = typeElement.getEnclosedElements().stream()
@@ -151,25 +152,32 @@ public class ComplexDeserializerCreator extends DeserializerCreator {
         private final TypeElement enumTypeElement;
         private final ImmutableList<Element> enumValueElements;
         private final ExecutableElement enumValueAccessorMethod;
+        private final ExecutableElement enumInstanceAccessorMethod;
 
         private DeserializationConstructs(TypeElement enumTypeElement,
                                           ImmutableList<Element> enumValueElements,
-                                          ExecutableElement enumValueAccessorMethod) {
+                                          ExecutableElement enumValueAccessorMethod,
+                                          ExecutableElement enumInstanceAccessorMethod) {
             this.enumTypeElement = enumTypeElement;
             this.enumValueElements = enumValueElements;
             this.enumValueAccessorMethod = enumValueAccessorMethod;
+            this.enumInstanceAccessorMethod = enumInstanceAccessorMethod;
+        }
+
+        private ExecutableElement getEnumInstanceAccessorMethod() {
+            return this.enumInstanceAccessorMethod;
         }
 
         private TypeElement getEnumTypeElement() {
-            return enumTypeElement;
+            return this.enumTypeElement;
         }
 
         private ImmutableList<Element> getEnumValueElements() {
-            return enumValueElements;
+            return this.enumValueElements;
         }
 
         private ExecutableElement getEnumValueAccessorMethod() {
-            return enumValueAccessorMethod;
+            return this.enumValueAccessorMethod;
         }
     }
 }

@@ -41,8 +41,8 @@ manually, such as:
 ObjectMapper objectMapper = ...
 SimpleModule deserialzationModule = new SimpleModule();
 deserialzationModule.addDeserializer(Fraggle.class, new Fraggle_AutoJacksonDeserializer());
-deserialzationModule.addDeserializer(Muppet.class, new Fraggle_AutoJacksonDeserializer());
-deserialzationModule.addDeserializer(SillyCreature.class, new Fraggle_AutoJacksonDeserializer());
+deserialzationModule.addDeserializer(Muppet.class, new Muppet_AutoJacksonDeserializer());
+deserialzationModule.addDeserializer(SillyCreature.class, new SillyCreature_AutoJacksonDeserializer());
 objectMapper.registerModule(deserialzationModule);
 ```
 

@@ -4,14 +4,48 @@ to facilitate JSON serialization and deserialization.
 
 
 ### Annotations
-##### @AutoJackson
-TODO
-##### @AutoJacksonTypeClass
-TODO
-##### @Named
+
+##### `@AutoJackson`
+Annotation placed on interfaces to automatically generate the needed
+deserializers and classes needed to create concrete instances of
+those interfaces. An `AutoJackson.Type` can be given to the annotation
+when more than one class needs to implement a given interface.
+
+##### `@AutoJacksonTypeClass`
+When needing to have multiple concrete implementation of an interface,
+the class passed into the `AutoJackson.Type` needs to have an accessor
+annotated with this annotation. This is required to know which method 
+will return the Class definition for the interface that matches the 
+enumeration value for the class passed in to the `AutoJackson.Type`.
+
+See the usage below for an example
+
+##### `@Named`
 Annotation placed on methods of the interface to expliclty controll the
 JSON key used for that item. If not provided a method in the form of
 `getSuperItem()` is expected, and would default to `superItem`.
+
+### Setup
+
+##### `AutoJacksonSetup.Java`
+After all the classes have been annotated and compiled an additional
+class is created to avoid the boiler plate of adding each of the 
+Jackson deserializers to the `ObjectMapper` used for deserializtion.
+```
+ObjectMapper objectMapper = ...
+AutoJacksonSetup.configureObjectMapper( objectMapper );
+```
+Using the configuration avoids having to add each custom deserializer
+manually, such as:
+```
+ObjectMapper objectMapper = ...
+SimpleModule deserialzationModule = new SimpleModule();
+deserialzationModule.addDeserializer(Fraggle.class, new Fraggle_AutoJacksonDeserializer());
+deserialzationModule.addDeserializer(Muppet.class, new Fraggle_AutoJacksonDeserializer());
+deserialzationModule.addDeserializer(SillyCreature.class, new Fraggle_AutoJacksonDeserializer());
+objectMapper.registerModule(deserialzationModule);
+```
+
 
 ### Usage
 Given the example JSON document

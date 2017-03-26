@@ -2,16 +2,15 @@
 Annotations to avoid manually adding Jackson annotaions to your model classes
 to facilitate JSON serialization and deserialization.
 
+## Annotations
 
-### Annotations
-
-##### `@AutoJackson`
+#### `@AutoJackson`
 Annotation placed on interfaces to automatically generate the needed
 deserializers and classes needed to create concrete instances of
 those interfaces. An `AutoJackson.Type` can be given to the annotation
 when more than one class needs to implement a given interface.
 
-##### `@AutoJacksonTypeClass`
+#### `@AutoJacksonTypeClass`
 When needing to have multiple concrete implementation of an interface,
 the class passed into the `AutoJackson.Type` needs to have an accessor
 annotated with this annotation. This is required to know which method 
@@ -20,14 +19,14 @@ enumeration value for the class passed in to the `AutoJackson.Type`.
 
 See the usage below for an example
 
-##### `@Named`
+#### `@Named`
 Annotation placed on methods of the interface to expliclty controll the
 JSON key used for that item. If not provided a method in the form of
 `getSuperItem()` is expected, and would default to `superItem`.
 
-### Setup
+## Usage after applying annotations
 
-##### `AutoJacksonSetup.Java`
+#### `AutoJacksonSetup.Java`
 After all the classes have been annotated and compiled an additional
 class is created to avoid the boiler plate of adding each of the 
 Jackson deserializers to the `ObjectMapper` used for deserializtion.
@@ -47,8 +46,8 @@ objectMapper.registerModule(deserialzationModule);
 ```
 
 
-### Usage
-Given the example JSON document
+### Example
+Given the example JSON document:
 ```json
 {
   "fraggles" : [
@@ -57,7 +56,7 @@ Given the example JSON document
       "hairColour" : "blue",
       "hat" : true,
       "job" : {
-        "ocupation" : "Actor",
+        "occupation" : "Actor",
         "daysWorked" : 0
       }
     },
@@ -70,13 +69,36 @@ Given the example JSON document
 }
 ```
 
-A set of interfaces would need to be created and annotated
+
+AutoJackson annotations could be used rather than the Jackson annotations
+
+---
+###### AutoJackson `FraggleList.java`
 ```java
 @AutoJackson
 public interface FraggleList {
     List<Fraggle> getFraggles();
 }
 ```
+###### Base Jackson `FraggleList.java`
+```java
+public class FraggleList {
+    private static final String FRAGGLES_KEY = "fraggles";
+
+    @JsonProperty(FRAGGLES_KEY)
+    private final List<Fraggle> fraggles;
+
+    public FraggleList(@JsonProperty(FRAGGLES_KEY, required = true) List<Fraggle> fraggles) {
+        this.fraggles = fraggles;
+    }
+    
+    public List<Fraggle> getFraggles() {
+        return this.fraggles;
+    }
+}
+```
+---
+###### AutoJackson `Fraggle.java`
 ```java
 @AutoJackson
 public interface Fraggle {
@@ -102,6 +124,57 @@ public interface Fraggle {
     }
 }
 ```
+###### Base Jackson `Fraggle.java`
+```java
+@JsonTypeInfo(use = Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "name") // not compile time checked
+@JsonSubTypes({
+        @Type(value = Wembley.class, name = "WEMBLEY"), // not compile time checked
+        @Type(value = Boober.class, name = "BOOBER")    // not compile time checked
+})
+public abstract class Fraggle {
+    protected static final String HAIR_COLOUR_KEY = "hairColour";
+    protected static final String HAT_KEY = "hat";
+    protected static final String JOB_KEY = "job";
+
+    @JsonProperty(value = HAIR_COLOUR_KEY, required = true)
+    private final String hairColour;
+
+    @JsonProperty(value = HAT_KEY, required = true)
+    private final Boolean wearsHats;
+
+    @JsonProperty(value = JOB_KEY)
+    private final Optional<Job> job;
+
+    protected Fraggle(String hairColour, Boolean wearsHats, Optional<Job> job) {
+        this.hairColour = hairColour;
+        this.wearsHats = wearsHats;
+        this.job = job;
+    }
+
+    @JsonProperty("name")
+    public abstract FraggleName getName();
+
+    public String getHairColour() {
+        return this.hairColour;
+    }
+
+    public  Boolean wearsHats() {
+        return this.wearsHats;
+    }
+
+    public Optional<Job> getJob() {
+        return this.job;
+    }
+
+    public enum FraggleName {
+        WEMBLEY, BOOBER
+    }
+}
+```
+---
+###### AutoJackson `Job.java`
 ```java
 @AutoJackson
 public interface Job {
@@ -109,23 +182,65 @@ public interface Job {
     int getDaysWorked();
 }
 ```
+###### Base Jackson `Job.java`
+```java
+public class Job {
+    private static final String OCCUPATION_KEY = "occupation";
+    private static final String DAYS_WORKED_KEY = "daysWorked";
+
+    @JsonProperty(value = OCCUPATION_KEY, required = true)
+    private final String occupation;
+
+    @JsonProperty(value = DAYS_WORKED_KEY, required = true)
+    private final int daysWorked;
+
+    public Job(@JsonProperty(value = OCCUPATION_KEY, required = true) String occupation,
+               @JsonProperty(value = DAYS_WORKED_KEY, required = true) int daysWorked) {
+        this.occupation = occupation;
+        this.daysWorked = daysWorked;
+    }
+
+    public String getOccupation() {
+        return this.occupation;
+    }
+
+    public int getDaysWorked() {
+        return this.daysWorked;
+    }
+}
+```
+---
+###### AutoJackson `Wembley.java`
 ```java
 @AutoJackson
 public interface Wembley { }
 ```
+###### Base Jackson `Wembley.java`
+```java
+public class Wembley extends Fraggle {
+    public Wembley(@JsonProperty(value = HAIR_COLOUR_KEY, required = true) String hairColour,
+                   @JsonProperty(value = HAT_KEY, required = true) Boolean wearsHats,
+                   @JsonProperty(value = JOB_KEY) Optional<Job> job) {
+        super(hairColour, wearsHats, job);
+    }
+}
+```
+---
+###### AutoJackson `Boober.java`
 ```java
 @AutoJackson
 public interface Boober { }
 ```
-
-And then to start using it configure a Jackson `ObjectMapper` and start serializing/deserializing
+###### Base Jackson `Boober.java`
 ```java
-ObjectMapper.objectMapper = new ObjectMapper();
-AutoJacksonSetup.configureObjectMapper(this.objectMapper);
-
-String jsonData = ...
-FraggleList fraggleList = objectMapper.readValue(jsonData, FraggleList.class);
+public class Boober extends Fraggle {
+    public Boober(@JsonProperty(value = HAIR_COLOUR_KEY, required = true) String hairColour,
+                  @JsonProperty(value = HAT_KEY, required = true) Boolean wearsHats,
+                  @JsonProperty(value = JOB_KEY) Optional<Job> job) {
+        super(hairColour, wearsHats, job);
+    }
+}
 ```
-
-#### Additional Examples
+---
+### Additional Examples
 See the [packaged example models](/examples/src/main/java/peckb1/examples/model) for a more complex example.

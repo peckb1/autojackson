@@ -1,4 +1,4 @@
-package peckb1.examples.model;
+package peckb1.examples.auto;
 
 
 public enum Muppet {

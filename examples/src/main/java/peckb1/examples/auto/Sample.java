@@ -1,4 +1,4 @@
-package peckb1.examples.model;
+package peckb1.examples.auto;
 
 import peckb1.processor.AutoJackson;
 import peckb1.processor.Named;

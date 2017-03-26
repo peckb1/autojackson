@@ -1,0 +1,18 @@
+{
+  "fraggles" : [
+    {
+      "name" : "BOOBER",
+      "hairColour" : "blue",
+      "hat" : true,
+      "job" : {
+        "occupation" : "Actor",
+        "daysWorked" : 0
+      }
+    },
+    {
+      "name" : "WEMBLEY",
+      "hairColour" : "yellow",
+      "hat" : false
+    }
+  ]
+}

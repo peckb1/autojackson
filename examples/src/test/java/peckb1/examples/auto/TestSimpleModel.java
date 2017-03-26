@@ -1,4 +1,4 @@
-package peckb1.examples;
+package peckb1.examples.auto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -7,15 +7,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import peckb1.autojackson.AutoJacksonSetup;
-import peckb1.examples.model.Fraggle;
-import peckb1.examples.model.Fraggle.FraggleName;
-import peckb1.examples.model.Gorg;
-import peckb1.examples.model.Muppet;
-import peckb1.examples.model.Sample;
-import peckb1.examples.model.fraggles.Boober;
-import peckb1.examples.model.fraggles.Gobo;
-import peckb1.examples.model.fraggles.Mokey;
-import peckb1.examples.model.fraggles.Wembley;
+import peckb1.examples.auto.Fraggle.FraggleName;
+import peckb1.examples.auto.fraggles.Boober;
+import peckb1.examples.auto.fraggles.Gobo;
+import peckb1.examples.auto.fraggles.Mokey;
+import peckb1.examples.auto.fraggles.Wembley;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +39,7 @@ public class TestSimpleModel {
 
     @Test
     public void testSimpleModel() throws IOException {
-        File simpleModelFile = new File("resources/simple_model.json");
+        File simpleModelFile = new File("resources/auto_model_simple.json");
         Sample sample = this.objectMapper.readValue(simpleModelFile, Sample.class);
 
         checkSample(sample);

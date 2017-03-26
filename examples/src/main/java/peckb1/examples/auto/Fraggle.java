@@ -1,11 +1,11 @@
-package peckb1.examples.model;
+package peckb1.examples.auto;
 
-import peckb1.examples.model.Fraggle.FraggleName;
-import peckb1.examples.model.fraggles.Boober;
-import peckb1.examples.model.fraggles.Gobo;
-import peckb1.examples.model.fraggles.Mokey;
-import peckb1.examples.model.fraggles.Red;
-import peckb1.examples.model.fraggles.Wembley;
+import peckb1.examples.auto.Fraggle.FraggleName;
+import peckb1.examples.auto.fraggles.Boober;
+import peckb1.examples.auto.fraggles.Gobo;
+import peckb1.examples.auto.fraggles.Mokey;
+import peckb1.examples.auto.fraggles.Red;
+import peckb1.examples.auto.fraggles.Wembley;
 import peckb1.processor.AutoJackson;
 import peckb1.processor.AutoJacksonTypeClass;
 import peckb1.processor.Named;

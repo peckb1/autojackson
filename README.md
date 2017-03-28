@@ -253,4 +253,4 @@ public class Boober extends Fraggle {
 ```
 ---
 ### Additional Examples
-See the [packaged example models](/examples/src/main/java/peckb1/examples/model) for a more complex example.
+See the [packaged example models](/examples/src/main/java/peckb1/examples/auto) for a more complex example.

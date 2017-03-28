@@ -1,5 +1,6 @@
 package peckb1.examples.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -37,11 +38,14 @@ public abstract class Fraggle {
         this.job = job;
     }
 
+    @JsonIgnore
+    public abstract FraggleName getFraggleName();
+
     public String getHairColour() {
         return this.hairColour;
     }
 
-    public  Boolean wearsHats() {
+    public Boolean wearsHats() {
         return this.wearsHats;
     }
 

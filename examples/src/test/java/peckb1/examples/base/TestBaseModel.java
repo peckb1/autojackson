@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import peckb1.autojackson.AutoJacksonSetup;
+import peckb1.examples.base.Fraggle.FraggleName;
 import peckb1.examples.base.fraggles.Boober;
 import peckb1.examples.base.fraggles.Wembley;
 
@@ -50,6 +51,7 @@ public class TestBaseModel {
 
     private void checkWembley(Fraggle fraggle) {
         Assert.assertTrue(fraggle instanceof Wembley);
+        Assert.assertEquals(FraggleName.WEMBLEY, fraggle.getFraggleName());
         Assert.assertEquals("yellow", fraggle.getHairColour());
         Assert.assertEquals(false, fraggle.wearsHats());
         Assert.assertFalse(fraggle.getJob().isPresent());
@@ -57,6 +59,7 @@ public class TestBaseModel {
 
     private void checkBoober(Fraggle fraggle) {
         Assert.assertTrue(fraggle instanceof Boober);
+        Assert.assertEquals(FraggleName.BOOBER, fraggle.getFraggleName());
         Assert.assertEquals("blue", fraggle.getHairColour());
         Assert.assertEquals(true, fraggle.wearsHats());
         Assert.assertTrue(fraggle.getJob().isPresent());

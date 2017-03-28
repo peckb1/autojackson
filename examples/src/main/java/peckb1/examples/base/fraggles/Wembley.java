@@ -12,4 +12,9 @@ public class Wembley extends Fraggle {
                    @JsonProperty(value = JOB_KEY) Optional<Job> job) {
         super(hairColour, wearsHats, job);
     }
+
+    @Override
+    public FraggleName getFraggleName() {
+        return FraggleName.WEMBLEY;
+    }
 }

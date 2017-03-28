@@ -85,10 +85,10 @@ public interface FraggleList {
 public class FraggleList {
     private static final String FRAGGLES_KEY = "fraggles";
 
-    @JsonProperty(FRAGGLES_KEY)
+    @JsonProperty(value = FRAGGLES_KEY, required = true)
     private final List<Fraggle> fraggles;
 
-    public FraggleList(@JsonProperty(FRAGGLES_KEY, required = true) List<Fraggle> fraggles) {
+    public FraggleList(@JsonProperty(value = FRAGGLES_KEY, required = true) List<Fraggle> fraggles) {
         this.fraggles = fraggles;
     }
     
@@ -153,14 +153,14 @@ public abstract class Fraggle {
         this.job = job;
     }
 
-    @JsonProperty("name")
-    public abstract FraggleName getName();
+    @JsonIgnore
+    public abstract FraggleName getFraggleName();
 
     public String getHairColour() {
         return this.hairColour;
     }
 
-    public  Boolean wearsHats() {
+    public Boolean wearsHats() {
         return this.wearsHats;
     }
 
@@ -223,6 +223,11 @@ public class Wembley extends Fraggle {
                    @JsonProperty(value = JOB_KEY) Optional<Job> job) {
         super(hairColour, wearsHats, job);
     }
+
+    @Override
+    public FraggleName getFraggleName() {
+        return FraggleName.WEMBLEY;
+    }
 }
 ```
 ---
@@ -238,6 +243,11 @@ public class Boober extends Fraggle {
                   @JsonProperty(value = HAT_KEY, required = true) Boolean wearsHats,
                   @JsonProperty(value = JOB_KEY) Optional<Job> job) {
         super(hairColour, wearsHats, job);
+    }
+
+    @Override
+    public FraggleName getFraggleName() {
+        return FraggleName.BOOBER;
     }
 }
 ```

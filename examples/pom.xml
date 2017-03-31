@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>peckb1</groupId>
+        <groupId>com.github.peckb1</groupId>
         <artifactId>autojackson</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -15,7 +15,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>peckb1</groupId>
+            <groupId>com.github.peckb1</groupId>
             <artifactId>processor</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

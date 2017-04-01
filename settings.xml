@@ -1,9 +1,11 @@
 <!-- settings.xml -->
-<servers>
-    <server>
-        <!-- Maven Central Deployment -->
-        <id>ossrh</id>
-        <username>${env.SONATYPE_USERNAME}</username>
-        <password>${env.SONATYPE_PASSWORD}</password>
-    </server>
-</servers>
+<settings>
+    <servers>
+        <server>
+            <!-- Sonatype Settings -->
+            <id>ossrh</id>
+            <username>${env.SONATYPE_USERNAME}</username>
+            <password>${env.SONATYPE_PASSWORD}</password>
+        </server>
+    </servers>
+</settings>

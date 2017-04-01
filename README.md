@@ -2,6 +2,8 @@
 Annotations to avoid manually adding Jackson annotaions to your model classes
 to facilitate JSON serialization and deserialization.
 
+[![Build Status](https://travis-ci.org/peckb1/autojackson.svg?branch=master)](https://travis-ci.org/peckb1/autojackson)
+
 ## Annotations
 
 #### `@AutoJackson`

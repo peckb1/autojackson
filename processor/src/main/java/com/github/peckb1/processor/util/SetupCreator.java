@@ -25,7 +25,7 @@ import static com.github.peckb1.processor.util.DeserializerCreator.DESERIALIZER_
  * Creates a single class that can be used to setup an {@link ObjectMapper}
  * with the deserializers and Jackson settings needed to allow the
  * {@link AutoJackson} to function correctly.
- * <br></br>
+ * <p>
  * The class created is only a helper method to avoid the boiler plate of
  * adding in each deserializer created for each class annotated with
  * our {@link AutoJackson} annotation. But the steps

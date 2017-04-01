@@ -29,7 +29,7 @@ import java.io.IOException;
  * used by Jackson to create the instances of the interfaces
  * annotated by our {@link AutoJackson} annotation.
  */
-abstract class DeserializerCreator {
+public abstract class DeserializerCreator {
 
     final static String DESERIALIZER_CLASS_NAME_SUFFIX = "_AutoJacksonDeserializer";
     final static String JSON_PARSER_PARAMETER_NAME = "jsonParser";
@@ -51,7 +51,8 @@ abstract class DeserializerCreator {
     /**
      * Creates a custom Jackson deserializer for the given
      * {@link TypeElement}. Filling out the logic of the actual
-     * deserialize method using the {@link #implementDeserializeMethod(TypeElement, Builder)}
+     * deserialize method using the {@link DeserializerCreator
+     * #implementDeserializeMethod(TypeElement, Builder)}
      * method implemented by our subclasses.
      *
      * @param typeElement The interface to create a custom deserializer for
@@ -108,7 +109,7 @@ abstract class DeserializerCreator {
 
     /**
      * Implement the logic for the deserialize method.
-     * <br></br>
+     * <p>
      * The method definition (parameters, modifiers, return type, etc...) are
      * created a head of time as the method is implementing an interface and
      * does not change based on implementation.

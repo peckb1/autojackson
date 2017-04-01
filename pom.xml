@@ -13,6 +13,33 @@
         <jackson.version>2.8.5</jackson.version>
     </properties>
 
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>A set of annotations to use in conjunction with the Jackson JSON project
+        to cut down on the boiler plate needed to de/serializer JSON data into Java objects</description>
+    <url>https://github.com/peckb1/autojackson</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Brian Peck</name>
+            <email>Brian.Andrew.Peck@gmail.com</email>
+            <organization>peckb1</organization>
+            <organizationUrl>https://github.com/peckb1</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/peckb1/autojackson.git</connection>
+        <developerConnection>scm:git:ssh://github.com:peckb1/autojackson.git</developerConnection>
+        <url>hhttps://github.com/peckb1/autojackson/tree/master</url>
+    </scm>
+
     <modules>
         <module>examples</module>
         <module>processor</module>

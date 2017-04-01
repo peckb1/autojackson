@@ -60,7 +60,7 @@ public final class ProcessorUtil {
 
     /**
      * Create the member variable name for a given method.
-     * <br></br>
+     * <p>
      * For Example:
      * <pre>
      * {@code getSomethingAwesome()}

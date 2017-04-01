@@ -11,27 +11,27 @@ import java.lang.annotation.Target;
  * </p>
  * For Example
  * <pre>
- * {@code @AutoJackson(type = @AutoJackson.Type(FraggleName.class))
- *   public interface Fraggle {
+ * <code>{@literal @}AutoJackson(type = {@literal @}AutoJackson.Type(FraggleName.class))
+ *  public interface Fraggle {
  *
- *       FraggleName getName();
+ *      FraggleName getName();
  *
- *       enum FraggleName {
- *           GOBO(Gobo.class);
+ *      enum FraggleName {
+ *          GOBO(Gobo.class);
  *
- *           private final Class<? extends Fraggle> fraggleClass;
+ *          private final Class&lt;? extends Fraggle&gt; fraggleClass;
  *
- *           FraggleName(Class<? extends Fraggle> fraggleClass) {
- *               this.fraggleClass = fraggleClass;
- *           }
+ *          FraggleName(Class&lt;? extends Fraggle&gt; fraggleClass) {
+ *              this.fraggleClass = fraggleClass;
+ *          }
  *
- *          @code @AutoJacksonTypeClass
- *           public Class<? extends Fraggle> getFraggleClass() {
- *               return fraggleClass;
- *           }
- *       }
+ *         {@literal @}AutoJacksonTypeClass
+ *          public Class&lt;? extends Fraggle&gt; getFraggleClass() {
+ *              return fraggleClass;
+ *          }
+ *      }
  *  }
- * }
+ * </code>
  * </pre>
  * Uses the annotation to denote that getFraggleClass() is the method which
  * returns the particular class implementing the interface for each enum type

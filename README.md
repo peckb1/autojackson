@@ -256,3 +256,26 @@ public class Boober extends Fraggle {
 ---
 ### Additional Examples
 See the [packaged example models](/examples/src/main/java/peckb1/examples/auto) for a more complex example.
+
+---
+### Getting Autojackson
+
+The `autojackson-processor` package contains the annotations and processor code that must be included.
+
+With Maven:
+
+```xml
+<dependency>
+    <groupId>com.github.peckb1</groupId>
+    <artifactId>autojackson-processor</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+With Gradle:
+
+```groovy
+compile 'com.github.peckb1:autojackson-processor:1.0.0'
+```
+
+Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/).

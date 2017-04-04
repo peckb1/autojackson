@@ -71,18 +71,12 @@ Given the example JSON document:
 }
 ```
 
+Rather than using the full Jackson annotations for the JSON processing
+AutoJackson can be used to simplify your models.
 
-AutoJackson annotations could be used rather than the Jackson annotations
-
+&nbsp;
 ---
-###### AutoJackson `FraggleList.java`
-```java
-@AutoJackson
-public interface FraggleList {
-    List<Fraggle> getFraggles();
-}
-```
-###### Base Jackson `FraggleList.java`
+##### `FraggleList.java` - Standard Jackson Annotations
 ```java
 public class FraggleList {
     private static final String FRAGGLES_KEY = "fraggles";
@@ -93,40 +87,22 @@ public class FraggleList {
     public FraggleList(@JsonProperty(value = FRAGGLES_KEY, required = true) List<Fraggle> fraggles) {
         this.fraggles = fraggles;
     }
-    
+
     public List<Fraggle> getFraggles() {
         return this.fraggles;
     }
 }
 ```
----
-###### AutoJackson `Fraggle.java`
+##### `FraggleList.java` - AutoJackson Annotations
 ```java
 @AutoJackson
-public interface Fraggle {
-    FraggleName getName();
-    String getHairColour();
-    @Named("hat") Boolean wearsHats();
-    Optional<Job> getJob();
-    
-    enum FraggleName {
-        WEMBLEY(Wembley.class),
-        BOOBER(Boober.class),
-
-        private final Class<? extends Fraggle> fraggleClass;
-
-        FraggleName(Class<? extends Fraggle> fraggleClass) {
-            this.fraggleClass = fraggleClass;
-        }
-
-        @AutoJacksonTypeClass
-        public Class<? extends Fraggle> getFraggleClass() {
-            return fraggleClass;
-        }
-    }
+public interface FraggleList {
+    List<Fraggle> getFraggles();
 }
 ```
-###### Base Jackson `Fraggle.java`
+&nbsp;
+---
+##### `Fraggle.java` - Standard Jackson Annotations
 ```java
 @JsonTypeInfo(use = Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -175,16 +151,35 @@ public abstract class Fraggle {
     }
 }
 ```
----
-###### AutoJackson `Job.java`
+##### `Fraggle.java` - AutoJackson Annotations
 ```java
 @AutoJackson
-public interface Job {
-    String getOccupation();
-    int getDaysWorked();
+public interface Fraggle {
+    FraggleName getName();
+    String getHairColour();
+    @Named("hat") Boolean wearsHats();
+    Optional<Job> getJob();
+    
+    enum FraggleName {
+        WEMBLEY(Wembley.class),
+        BOOBER(Boober.class),
+
+        private final Class<? extends Fraggle> fraggleClass;
+
+        FraggleName(Class<? extends Fraggle> fraggleClass) {
+            this.fraggleClass = fraggleClass;
+        }
+
+        @AutoJacksonTypeClass
+        public Class<? extends Fraggle> getFraggleClass() {
+            return fraggleClass;
+        }
+    }
 }
 ```
-###### Base Jackson `Job.java`
+&nbsp;
+---
+###### `Job.java` - Standard Jackson Annotations
 ```java
 public class Job {
     private static final String OCCUPATION_KEY = "occupation";
@@ -211,13 +206,17 @@ public class Job {
     }
 }
 ```
----
-###### AutoJackson `Wembley.java`
+###### `Job.java` - AutoJackson Annotations
 ```java
 @AutoJackson
-public interface Wembley { }
+public interface Job {
+    String getOccupation();
+    int getDaysWorked();
+}
 ```
-###### Base Jackson `Wembley.java`
+---
+&nbsp;
+###### `Wembley.java` - Standard Jackson Annotations
 ```java
 public class Wembley extends Fraggle {
     public Wembley(@JsonProperty(value = HAIR_COLOUR_KEY, required = true) String hairColour,
@@ -232,13 +231,14 @@ public class Wembley extends Fraggle {
     }
 }
 ```
----
-###### AutoJackson `Boober.java`
+###### `Wembley.java` - AutoJackson Annotations
 ```java
 @AutoJackson
-public interface Boober { }
+public interface Wembley { }
 ```
-###### Base Jackson `Boober.java`
+&nbsp;
+---
+###### `Boober.java` - Standard Jackson Annotations
 ```java
 public class Boober extends Fraggle {
     public Boober(@JsonProperty(value = HAIR_COLOUR_KEY, required = true) String hairColour,
@@ -253,6 +253,12 @@ public class Boober extends Fraggle {
     }
 }
 ```
+###### `Boober.java` - AutoJackson Annotations
+```java
+@AutoJackson
+public interface Boober { }
+```
+&nbsp;
 ---
 ### Additional Examples
 See the [packaged example models](/examples/src/main/java/peckb1/examples/auto) for a more complex example.

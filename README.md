@@ -76,6 +76,7 @@ AutoJackson can be used to simplify your models.
 
 &nbsp;
 ---
+&nbsp;
 ##### `FraggleList.java` - Standard Jackson Annotations
 ```java
 public class FraggleList {
@@ -102,6 +103,7 @@ public interface FraggleList {
 ```
 &nbsp;
 ---
+&nbsp;
 ##### `Fraggle.java` - Standard Jackson Annotations
 ```java
 @JsonTypeInfo(use = Id.NAME,
@@ -179,6 +181,7 @@ public interface Fraggle {
 ```
 &nbsp;
 ---
+&nbsp;
 ###### `Job.java` - Standard Jackson Annotations
 ```java
 public class Job {
@@ -214,6 +217,7 @@ public interface Job {
     int getDaysWorked();
 }
 ```
+&nbsp;
 ---
 &nbsp;
 ###### `Wembley.java` - Standard Jackson Annotations
@@ -238,6 +242,7 @@ public interface Wembley { }
 ```
 &nbsp;
 ---
+&nbsp;
 ###### `Boober.java` - Standard Jackson Annotations
 ```java
 public class Boober extends Fraggle {

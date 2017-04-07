@@ -32,12 +32,11 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A creator which implements interfaces annotated with {@link AutoJackson}
@@ -93,27 +92,32 @@ public class ImplementationCreator {
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC);
 
-        Set<MethodDetail> methodDetails = loadMethodDetails(typeElement);
-
-        methodDetails.forEach(methodDetail -> {
-            ExecutableElement method = methodDetail.element;
-            TypeMirror returnType = methodDetail.differentReturnType.orElse(method.getReturnType());
+        Set<MethodDetail> methods = loadMethodDetails(typeElement);
+        methods.forEach(methodDetail -> {
+            // for each accessor method we need to create, let's populate our class
+            ExecutableElement method = methodDetail.getElement();
+            TypeMirror returnType = methodDetail.getDifferentReturnType().orElse(method.getReturnType());
             TypeName returnTypeName = ClassName.get(returnType);
             String memberVariableName = this.processorUtil.createMemberVariableName(method);
             String constantName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, memberVariableName);
+
+            // create the annotation used by our constructor parameter and member variable
             AnnotationSpec jsonPropertyAnnotation = createJsonPropertyAnnotation(returnType, constantName);
 
+            // add the actual method itself
             classBuilder.addMethod(MethodSpec.overriding(method)
                     .returns(TypeName.get(returnType))
                     .addStatement("return $L", memberVariableName)
                     .build());
+            // create the field that the method will return
             classBuilder.addField(FieldSpec.builder(returnTypeName, memberVariableName, Modifier.PRIVATE, Modifier.FINAL)
                     .addAnnotation(jsonPropertyAnnotation)
                     .build());
+            // create the constant used by our annotations
             classBuilder.addField(FieldSpec.builder(String.class, constantName, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                     .initializer("$S", memberVariableName)
                     .build());
-
+            // add a parameter to our constructor which sets our new field, for our new method
             constructorBuilder.addStatement("this.$L = $L", memberVariableName, memberVariableName);
             constructorBuilder.addParameter(ParameterSpec.builder(returnTypeName, memberVariableName)
                     .addAnnotation(jsonPropertyAnnotation)
@@ -138,16 +142,9 @@ public class ImplementationCreator {
         Set<MethodDetail> methodDetails = new TreeSet<>();
 
         // load the methods as part of this type element
-        List<ExecutableElement> myMethods = typeElement.getEnclosedElements().stream()
-                .filter(e -> e.getKind() == ElementKind.METHOD)
-                .map(e -> (ExecutableElement) e)
-                .collect(Collectors.toList());
-
-        for (ExecutableElement method : myMethods) {
-            if (isValidMethod(method)) {
-                methodDetails.add(new MethodDetail(method));
-            }
-        }
+        loadMethods(typeElement)
+                .filter(this::isValidMethod)
+                .forEach(method -> methodDetails.add(new MethodDetail(method)));
 
         // and check for methods from our parent
         typeElement.getInterfaces().stream()
@@ -156,6 +153,63 @@ public class ImplementationCreator {
                 .forEach(details -> details.forEach(methodDetails::add));
 
         return methodDetails;
+    }
+
+    private Set<MethodDetail> loadParentMethodDetails(TypeMirror mirror) {
+        Set<MethodDetail> methodDetails = new TreeSet<>();
+
+        // swap the types of our mirror so we can load our data
+        DeclaredType declaredType = (DeclaredType) mirror;
+        TypeElement typeElement = (TypeElement) (declaredType).asElement();
+
+        // load the methods as part of this type element
+        loadMethods(typeElement)
+                .filter(this::isValidMethod)
+                .forEach(method -> methodDetails.add(checkParentMethod(declaredType, method)));
+
+        // and check for methods from our parent
+        typeElement.getInterfaces().stream()
+                .filter(tm -> tm.getKind() == TypeKind.DECLARED)
+                .map(this::loadParentMethodDetails)
+                .forEach(details -> details.forEach(methodDetails::add));
+
+        return methodDetails;
+    }
+
+    private MethodDetail checkParentMethod(DeclaredType declaredType, ExecutableElement method) {
+        // check to see if we have any type parameters at all, if we don't then we can just create
+        // the standard method
+        TypeElement typeElement = (TypeElement) (declaredType).asElement();
+        List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
+        if (typeParameters.isEmpty()) {
+            new MethodDetail(method);
+        }
+
+        // otherwise we need to check if our return type is actually one of our generic parameters
+        // first we need to check if our method return type matches one of our Type Parameters
+        Optional<? extends TypeParameterElement> element = typeParameters.stream()
+                .filter(parameterElement -> parameterElement.asType().getKind().equals(method.getReturnType().getKind()))
+                .findFirst();
+
+        return element.map(matchingType -> {
+            final List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+            final int parameterIndex = typeParameters.indexOf(matchingType);
+            final TypeMirror returnType;
+
+            if (typeArguments.size() > parameterIndex) {
+                returnType = typeArguments.get(parameterIndex);
+            } else {
+                returnType = ((TypeVariable) matchingType.asType()).getUpperBound();
+            }
+
+            return new MethodDetail(method, Optional.of(returnType));
+        }).orElse(new MethodDetail(method));
+    }
+
+    private Stream<ExecutableElement> loadMethods(TypeElement typeElement) {
+        return typeElement.getEnclosedElements().stream()
+                .filter(e -> e.getKind() == ElementKind.METHOD)
+                .map(e -> (ExecutableElement) e);
     }
 
     private boolean isValidMethod(ExecutableElement method) {
@@ -171,66 +225,6 @@ public class ImplementationCreator {
             error = false;
         }
         return error;
-    }
-
-    private Set<MethodDetail> loadParentMethodDetails(TypeMirror mirror) {
-        DeclaredType declaredType = (DeclaredType) mirror;
-        TypeElement typeElement = (TypeElement) (declaredType).asElement();
-
-        List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
-
-        Set<MethodDetail> methodDetails = new TreeSet<>();
-
-        // load the methods as part of this type element
-        List<ExecutableElement> myMethods = typeElement.getEnclosedElements().stream()
-                .filter(e -> e.getKind() == ElementKind.METHOD)
-                .map(e -> (ExecutableElement) e)
-                .collect(Collectors.toList());
-
-        for (ExecutableElement method : myMethods) {
-            if (!isValidMethod(method)) {
-                continue;
-            }
-
-            List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
-            if (typeParameters.isEmpty()) {
-                methodDetails.add(new MethodDetail(method));
-                continue;
-            }
-
-            Predicate<? super TypeParameterElement> predicate = tpe ->
-                    tpe.asType().getKind() == TypeKind.TYPEVAR && tpe.asType().getKind().equals(method.getReturnType().getKind());
-
-            Map<Boolean, List<TypeParameterElement>> methods = typeParameters.stream().collect(Collectors.partitioningBy(predicate));
-
-            methods.forEach((customReturnType, typeParameterElements) -> {
-                if (typeParameterElements.isEmpty()) {
-                    return;
-                }
-                if (customReturnType) {
-                    typeParameterElements.forEach(tpe -> {
-                        final TypeMirror returnType;
-                        int parameterIndex = typeParameters.indexOf(tpe);
-                        if (typeArguments.size() > parameterIndex) {
-                            returnType = typeArguments.get(parameterIndex);
-                        } else {
-                            returnType = ((TypeVariable) tpe.asType()).getUpperBound();
-                        }
-                        methodDetails.add(new MethodDetail(method, Optional.of(returnType)));
-                    });
-                } else {
-                    methodDetails.add(new MethodDetail(method));
-                }
-            });
-        }
-
-        // and check for methods from our parent
-        typeElement.getInterfaces().stream()
-                .filter(tm -> tm.getKind() == TypeKind.DECLARED)
-                .map(this::loadParentMethodDetails)
-                .forEach(details -> details.forEach(methodDetails::add));
-
-        return methodDetails;
     }
 
     /**
@@ -252,25 +246,5 @@ public class ImplementationCreator {
         }
 
         return builder.build();
-    }
-
-    private class MethodDetail implements Comparable<MethodDetail> {
-
-        private final ExecutableElement element;
-        private final Optional<TypeMirror> differentReturnType;
-
-        private MethodDetail(ExecutableElement element) {
-            this(element, Optional.empty());
-        }
-
-        private MethodDetail(ExecutableElement element, Optional<TypeMirror> differentReturnType) {
-            this.element = element;
-            this.differentReturnType = differentReturnType;
-        }
-
-        @Override
-        public int compareTo(MethodDetail o) {
-            return this.element.getSimpleName().toString().compareTo(o.element.getSimpleName().toString());
-        }
     }
 }

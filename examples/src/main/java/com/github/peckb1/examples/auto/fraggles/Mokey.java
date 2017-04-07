@@ -6,7 +6,7 @@ import com.github.peckb1.processor.AutoJackson;
 import com.github.peckb1.processor.Named;
 
 @AutoJackson
-public interface Mokey extends Fraggle<KathrynMullen> {
+public interface Mokey extends Fraggle {
 
     @Named("radishes") int getRadishesPicked();
 

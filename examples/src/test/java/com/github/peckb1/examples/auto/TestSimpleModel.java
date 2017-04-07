@@ -40,7 +40,7 @@ public class TestSimpleModel {
 
     @Test
     public void testSimpleModel() throws IOException {
-        File simpleModelFile = new File("resources/auto_model_simple.json");
+        File simpleModelFile = new File("resources/auto_model.json");
         Sample sample = this.objectMapper.readValue(simpleModelFile, Sample.class);
 
         checkSample(sample);

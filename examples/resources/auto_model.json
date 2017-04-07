@@ -12,7 +12,17 @@
       "name": "WEMBLEY",
       "age": 9,
       "occupation": "fire truck siren",
-      "fires" : 15
+      "fires" : 15,
+      "muppeteer" : {
+        "name" : "Steve Whitemire"
+      }
+    },
+    "muppeteer" : {
+      "name" : "Jerry Nelson"
+    },
+    "x" : 4,
+    "zed" : {
+      "abc" : 123
     }
   },
   "gorg": {
@@ -32,13 +42,19 @@
       "name": "MOKEY",
       "age": 11,
       "occupation": "radish picker",
-      "radishes" : 500
+      "radishes" : 500,
+      "muppeteer" : {
+        "name" : "Kathryn Mullen"
+      }
     },
     {
       "name": "BOOBER",
       "age": 11,
       "occupation": "clothes washer",
-      "superstitions" : 9001
+      "superstitions" : 9001,
+      "muppeteer" : {
+        "name" : "Dave Goelz"
+      }
     }
   ],
   "fraggleArray": [
@@ -46,13 +62,19 @@
       "name": "BOOBER",
       "age": 11,
       "occupation": "clothes washer",
-      "superstitions" : 9001
+      "superstitions" : 9001,
+      "muppeteer" : {
+        "name" : "Dave Goelz"
+      }
     },
     {
       "name": "MOKEY",
       "age": 11,
       "occupation": "radish picker",
-      "radishes" : 500
+      "radishes" : 500,
+      "muppeteer" : {
+        "name" : "Kathryn Mullen"
+      }
     }
   ],
   "gorgList": [

@@ -13,12 +13,13 @@ import com.github.peckb1.processor.Named;
 import java.util.Optional;
 
 @AutoJackson(type = @AutoJackson.Type(FraggleName.class))
-public interface Fraggle {
+public interface Fraggle<M extends Muppeteer> {
 
     FraggleName getName();
     Integer getAge();
     @Named("occupation") String getJob();
     Optional<Fraggle> getRoommate();
+    M getMuppeteer();
 
     enum FraggleName {
         GOBO(Gobo.class),

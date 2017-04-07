@@ -75,6 +75,7 @@ public class ImplementationCreator {
                 .addMember("value", "$T.$L", Include.class, Include.NON_EMPTY)
                 .build();
 
+        // load up any type parameters for this class
         List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
         Iterable<TypeVariableName> typeVariableNames = typeParameters.stream()
                 .filter(tp -> tp.asType().getKind() == TypeKind.TYPEVAR)
@@ -82,6 +83,7 @@ public class ImplementationCreator {
                 .map(TypeVariableName::get)
                 .collect(Collectors.toList());
 
+        // create our base class to populate with defails
         TypeSpec.Builder classBuilder = TypeSpec
                 .classBuilder(className + CLASS_IMPLEMENTATION_NAME_SUFFIX)
                 .addSuperinterface(ClassName.get(typeElement))
@@ -89,9 +91,11 @@ public class ImplementationCreator {
                 .addTypeVariables(typeVariableNames)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
+        // create our base constructor
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC);
 
+        // start adding all methods from our list, and our parents list(s)
         Set<MethodDetail> methods = loadMethodDetails(typeElement);
         methods.forEach(methodDetail -> {
             // for each accessor method we need to create, let's populate our class
@@ -138,6 +142,13 @@ public class ImplementationCreator {
         }
     }
 
+    /**
+     * Loads all method details; from the original type element, and any parent inferfaces
+     * up the chain which have methods we need to implement as well
+     *
+     * @param typeElement The type element of the class being implemented
+     * @return A set of method details for all methods we need to implement
+     */
     private Set<MethodDetail> loadMethodDetails(TypeElement typeElement) {
         Set<MethodDetail> methodDetails = new TreeSet<>();
 
@@ -155,6 +166,53 @@ public class ImplementationCreator {
         return methodDetails;
     }
 
+    /**
+     * Loads all methods details ... but this time from only parent interfaces.
+     * <p>
+     * We split the parent from the base class when checking for methods due to generics.
+     * <p>
+     * If the base class has generics we're going to be looking only at the classes type parameters itself.
+     * However if a parent interface has types, we need to check the order of how we define those types, and
+     * use the correct return type.
+     * <p>
+     * For instance, in the following example we would need to know how Gobo and Wembley are implementing
+     * the {@code getMuppeteer()} method.
+     * <pre>
+     * {@code @AutoJackson()
+     *   public interface Fraggle<M extends Muppeteer> {
+     *     M getMuppeteer();
+     *   }
+     * }
+     *
+     * {@code @AutoJackson()
+     *   public interface Wembley { }
+     * }
+     *
+     * {@code @AutoJackson()
+     *   public interface Gobo<JerryNelson> { }
+     * }
+     * </pre>
+     * <p>
+     * After generation of the Impl files we would have
+     * <pre>
+     *  // inside Gobo_AutoJacksonImpl
+     * {@code @Override
+     *  public JerryNelson getMuppeteer() {
+     *      return muppeteer;
+     *  }
+     * }
+     *
+     *  // inside Wembley_AutoJacksonImpl
+     * {@code @Override
+     *  public Muppeteer getMuppeteer() {
+     *      return muppeteer;
+     *  }
+     * }
+     * </pre>
+     *
+     * @param mirror The type mirror of our parent interface
+     * @return A set of method details belonging to this item (and my parents)
+     */
     private Set<MethodDetail> loadParentMethodDetails(TypeMirror mirror) {
         Set<MethodDetail> methodDetails = new TreeSet<>();
 
@@ -176,6 +234,14 @@ public class ImplementationCreator {
         return methodDetails;
     }
 
+    /**
+     * A Helper method for {@link #loadMethodDetails(TypeElement)} which does the hard work of actually
+     * checking the types for the parents.
+     *
+     * @param declaredType The DeclaredType object for the interface which has the method
+     * @param method       The method checking for types on
+     * @return A method detail, either with the Generic return type, or the default return type
+     */
     private MethodDetail checkParentMethod(DeclaredType declaredType, ExecutableElement method) {
         // check to see if we have any type parameters at all, if we don't then we can just create
         // the standard method
@@ -206,12 +272,18 @@ public class ImplementationCreator {
         }).orElse(new MethodDetail(method));
     }
 
+    /**
+     * A quick method that loads methods from a given TypeElement
+     */
     private Stream<ExecutableElement> loadMethods(TypeElement typeElement) {
         return typeElement.getEnclosedElements().stream()
                 .filter(e -> e.getKind() == ElementKind.METHOD)
                 .map(e -> (ExecutableElement) e);
     }
 
+    /**
+     * @return true if it is a valid method to inplement, false otherwise
+     */
     private boolean isValidMethod(ExecutableElement method) {
         boolean error = true;
         List<? extends VariableElement> methodParameters = method.getParameters();

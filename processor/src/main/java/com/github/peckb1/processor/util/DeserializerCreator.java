@@ -68,9 +68,12 @@ public abstract class DeserializerCreator {
         ParameterizedTypeName parameterizedDeserializer = ParameterizedTypeName.get(stdDeserializer, deserializerType);
 
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
+        // since Generics don't work when calling .class, check if there are type parameters
         if (typeElement.getTypeParameters().isEmpty()) {
+            // if not we can use $T
             constructorBuilder.addStatement("super($T.class)", typeElement);
         } else {
+            // if so, we need to use the fully qualified name and $L
             constructorBuilder.addStatement("super($L.class)", typeElement.getQualifiedName());
         }
         MethodSpec constructor = constructorBuilder.build();

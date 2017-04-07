@@ -7,5 +7,7 @@ import com.github.peckb1.processor.Named;
 
 @AutoJackson
 public interface Red extends Fraggle<KarenPrell> {
+
     @Named("dives") int getDives();
+
 }

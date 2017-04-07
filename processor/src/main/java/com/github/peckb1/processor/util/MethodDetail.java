@@ -4,6 +4,12 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
+/**
+ * A wrapper object which contains the standard {@link ExecutableElement} which defines
+ * a method during annotation processing, as well as an optional return type should the
+ * {@link TypeMirror} object inside the base method be a generic variable, rather than
+ * a concrete class that can be instantiated.
+ */
 public class MethodDetail implements Comparable<MethodDetail> {
 
     private final ExecutableElement element;
@@ -18,11 +24,11 @@ public class MethodDetail implements Comparable<MethodDetail> {
         this.differentReturnType = differentReturnType;
     }
 
-    public ExecutableElement getElement() {
+    ExecutableElement getElement() {
         return element;
     }
 
-    public Optional<TypeMirror> getDifferentReturnType() {
+    Optional<TypeMirror> getDifferentReturnType() {
         return differentReturnType;
     }
 

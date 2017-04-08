@@ -15,7 +15,9 @@ import com.squareup.javapoet.TypeSpec;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import java.io.IOException;
+import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.PropertyAccessor.ALL;
@@ -55,7 +57,11 @@ public class SetupCreator {
         interfaces.forEach(element -> {
             String deserializationPackage = ClassName.get(element).packageName();
             ClassName deserializerClassName = ClassName.get(deserializationPackage, element.getSimpleName() + DESERIALIZER_CLASS_NAME_SUFFIX);
-            configurationMethodBuilder.addStatement("deserialzationModule.addDeserializer($T.class, new $T())", element, deserializerClassName);
+            if (element.getTypeParameters().isEmpty()) {
+                configurationMethodBuilder.addStatement("deserialzationModule.addDeserializer($T.class, new $T())", element, deserializerClassName);
+            } else {
+                configurationMethodBuilder.addStatement("deserialzationModule.addDeserializer($L.class, new $T())", element.getQualifiedName(), deserializerClassName);
+            }
         });
 
         configurationMethodBuilder

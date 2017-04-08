@@ -19,10 +19,12 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * The parent class for creating the custom deserializer objects
@@ -65,10 +67,16 @@ public abstract class DeserializerCreator {
         TypeName deserializerType = TypeName.get(declaredType);
         ParameterizedTypeName parameterizedDeserializer = ParameterizedTypeName.get(stdDeserializer, deserializerType);
 
-        MethodSpec constructor = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addStatement("super($T.class)", typeElement)
-                .build();
+        MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
+        // since Generics don't work when calling .class, check if there are type parameters
+        if (typeElement.getTypeParameters().isEmpty()) {
+            // if not we can use $T
+            constructorBuilder.addStatement("super($T.class)", typeElement);
+        } else {
+            // if so, we need to use the fully qualified name and $L
+            constructorBuilder.addStatement("super($L.class)", typeElement.getQualifiedName());
+        }
+        MethodSpec constructor = constructorBuilder.build();
 
         ParameterSpec jsonParserParameter = ParameterSpec.builder(JsonParser.class, JSON_PARSER_PARAMETER_NAME)
                 .build();

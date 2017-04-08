@@ -7,6 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.peckb1.examples.auto.fraggles.Boober;
 import com.github.peckb1.examples.auto.fraggles.Gobo;
 import com.github.peckb1.examples.auto.fraggles.Mokey;
+import com.github.peckb1.examples.auto.muppeteers.DaveGoelz;
+import com.github.peckb1.examples.auto.muppeteers.JerryNelson;
+import com.github.peckb1.examples.auto.muppeteers.KathrynMullen;
+import com.github.peckb1.examples.auto.muppeteers.SteveWhitmire;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,13 +23,14 @@ import java.io.IOException;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class TestSimpleModel {
+public class TestModel {
 
     private ObjectMapper objectMapper;
 
@@ -40,7 +45,7 @@ public class TestSimpleModel {
 
     @Test
     public void testSimpleModel() throws IOException {
-        File simpleModelFile = new File("resources/auto_model_simple.json");
+        File simpleModelFile = new File("resources/auto_model.json");
         Sample sample = this.objectMapper.readValue(simpleModelFile, Sample.class);
 
         checkSample(sample);
@@ -51,7 +56,7 @@ public class TestSimpleModel {
         checkSample(sampleAgain);
     }
 
-    private void checkSample(Sample sample) {
+    private void checkSample(Sample sample) throws IOException {
         assertEquals("A String", sample.getString());
         assertEquals(1, sample.getInt());
         assertEquals(true, sample.getBoolean());
@@ -118,7 +123,10 @@ public class TestSimpleModel {
         assertEquals(FraggleName.BOOBER, fraggle.getName());
         assertEquals(11, (int) fraggle.getAge());
         assertEquals("clothes washer", fraggle.getJob());
-        Assert.assertEquals(9001, ((Boober) fraggle).getNumberOfSuperstitions());
+        Muppeteer muppeteer = fraggle.getMuppeteer();
+        assertTrue(muppeteer instanceof DaveGoelz);
+        assertEquals("Dave Goelz", muppeteer.getName());
+        assertEquals(9001, ((Boober) fraggle).getNumberOfSuperstitions());
         assertFalse(fraggle.getRoommate().isPresent());
     }
 
@@ -126,15 +134,25 @@ public class TestSimpleModel {
         assertEquals(FraggleName.MOKEY, fraggle.getName());
         assertEquals(11, (int) fraggle.getAge());
         assertEquals("radish picker", fraggle.getJob());
-        Assert.assertEquals(500, ((Mokey) fraggle).getRadishesPicked());
+        assertEquals(500, ((Mokey) fraggle).getRadishesPicked());
         assertFalse(fraggle.getRoommate().isPresent());
+        Muppeteer muppeteer = fraggle.getMuppeteer();
+        assertFalse(muppeteer instanceof KathrynMullen);
+        assertEquals("Kathryn Mullen", muppeteer.getName());
     }
 
-    private void checkGobo(Fraggle fraggle) {
+    private void checkGobo(Fraggle fraggle) throws IOException {
         assertEquals(FraggleName.GOBO, fraggle.getName());
         assertEquals(10, (int) fraggle.getAge());
         assertEquals("singer", fraggle.getJob());
-        Assert.assertEquals(20, ((Gobo) fraggle).getFetchedPostcards());
+        Muppeteer muppeteer = fraggle.getMuppeteer();
+        assertTrue(muppeteer instanceof JerryNelson);
+        assertEquals("Jerry Nelson", muppeteer.getName());
+        assertEquals(20, ((Gobo) fraggle).getFetchedPostcards());
+        Map map = ((Gobo) fraggle).getMap();
+        assertEquals(1, map.size());
+        assertEquals(4, ((Gobo) fraggle).getX());
+        assertEquals(123, map.get("abc"));
 
         Optional<Fraggle> roommate = fraggle.getRoommate();
         assertTrue(roommate.isPresent());
@@ -145,6 +163,9 @@ public class TestSimpleModel {
         assertEquals(FraggleName.WEMBLEY, fraggle.getName());
         assertEquals(9, (int) fraggle.getAge());
         assertEquals("fire truck siren", fraggle.getJob());
+        Muppeteer muppeteer = fraggle.getMuppeteer();
+        assertTrue(muppeteer instanceof SteveWhitmire);
+        assertEquals("Steve Whitmire", muppeteer.getName());
         assertEquals(15, ((Wembley) fraggle).getNumberOfFiresPutOut());
         assertFalse(fraggle.getRoommate().isPresent());
     }

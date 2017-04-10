@@ -266,7 +266,7 @@ public interface Boober { }
 &nbsp;
 ---
 ### Additional Examples
-See the [packaged example models](/examples/src/main/java/peckb1/examples/auto) for a more complex example.
+See the [packaged example models](/examples/src/main/java/com/github/peckb1/examples/auto) for a more complex example.
 
 ---
 ### Getting Autojackson

@@ -7,11 +7,11 @@
     <parent>
         <groupId>com.github.peckb1</groupId>
         <artifactId>autojackson</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>autojackson-examples</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
 
     <build>
         <plugins>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.github.peckb1</groupId>
             <artifactId>autojackson-processor</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

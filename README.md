@@ -279,14 +279,14 @@ With Maven:
 <dependency>
     <groupId>com.github.peckb1</groupId>
     <artifactId>autojackson-processor</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
 With Gradle:
 
 ```groovy
-compile 'com.github.peckb1:autojackson-processor:1.1.1-SNAPSHOT'
+compile 'com.github.peckb1:autojackson-processor:1.1.1'
 ```
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/).

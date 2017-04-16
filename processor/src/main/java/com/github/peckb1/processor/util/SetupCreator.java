@@ -2,6 +2,7 @@ package com.github.peckb1.processor.util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.peckb1.processor.AutoJackson;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.PropertyAccessor.ALL;
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.github.peckb1.processor.util.DeserializerCreator.DESERIALIZER_CLASS_NAME_SUFFIX;
 
 /**
@@ -67,6 +69,7 @@ public class SetupCreator {
         configurationMethodBuilder
                 .addStatement("objectMapper.registerModule(deserialzationModule)")
                 .addStatement("objectMapper.setVisibility($T.$L, $T.$L)", PropertyAccessor.class, ALL, Visibility.class, NONE)
+                .addStatement("objectMapper.configure($T.$L, $L)", DeserializationFeature.class, FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .build();
 
         TypeSpec setupClass = TypeSpec

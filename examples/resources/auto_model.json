@@ -15,7 +15,8 @@
       "fires" : 15,
       "muppeteer" : {
         "name" : "Steve Whitmire"
-      }
+      },
+      "cookies" : true
     },
     "muppeteer" : {
       "name" : "Jerry Nelson"

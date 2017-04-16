@@ -1,5 +1,6 @@
 package com.github.peckb1.examples.auto;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -41,6 +42,7 @@ public class TestModel {
         this.objectMapper.registerModule(new Jdk8Module());
         this.objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         AutoJacksonSetup.configureObjectMapper(this.objectMapper);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Test
